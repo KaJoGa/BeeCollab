@@ -21,7 +21,17 @@ export class PrismaService
     // Ini support Supabase connection pooler (PgBouncer/Supavisor)
     const connectionString = process.env.DATABASE_URL;
 
-    const pool = new Pool({ connectionString });
+    // Neon scales to zero and drops idle connections: allow a slow cold start,
+    // keep the pool small, and never let an idle-client error crash the process.
+    const pool = new Pool({
+      connectionString,
+      max: 10,
+      connectionTimeoutMillis: 15000,
+      idleTimeoutMillis: 30000,
+    });
+    pool.on('error', (err) => {
+      new Logger(PrismaService.name).warn(`Idle DB client error: ${err.message}`);
+    });
     const adapter = new PrismaPg(pool);
 
     super({ adapter });
@@ -32,7 +42,7 @@ export class PrismaService
 
   async onModuleInit() {
     await this.$connect();
-    this.logger.log('✅ Prisma connected to Supabase PostgreSQL');
+    this.logger.log('✅ Prisma connected to PostgreSQL');
   }
 
   async onModuleDestroy() {
