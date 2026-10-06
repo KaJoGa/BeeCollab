@@ -77,20 +77,21 @@ function AuthPageInner() {
   return (
     <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8f9fa', padding: '1rem' }}>
       <div style={{ width: '100%', maxWidth: '400px', background: 'white', padding: '2.5rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #e1e4e8' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 600, marginBottom: '0.5rem', textAlign: 'center', color: '#202124' }}>
+        <h1 data-testid="auth-title" style={{ fontSize: '1.75rem', fontWeight: 600, marginBottom: '0.5rem', textAlign: 'center', color: '#202124' }}>
           {mode === 'login' ? 'Sign In' : 'Create Account'}
         </h1>
         <p style={{ color: '#5f6368', textAlign: 'center', marginBottom: '2rem', fontSize: '0.875rem' }}>
           {mode === 'login' ? 'Use your BeeCollab account' : 'Sign up to start collaborating'}
         </p>
 
-        {error && <div style={{ color: '#d93025', marginBottom: '1.5rem', textAlign: 'center', background: '#fce8e6', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem' }}>{error}</div>}
+        {error && <div data-testid="auth-error" style={{ color: '#d93025', marginBottom: '1.5rem', textAlign: 'center', background: '#fce8e6', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem' }}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {mode === 'register' && (
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>FULL NAME</label>
               <input
+                data-testid="auth-name-input"
                 type="text"
                 placeholder="John Doe"
                 value={name}
@@ -103,6 +104,7 @@ function AuthPageInner() {
           <div>
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>EMAIL ADDRESS</label>
             <input
+              data-testid="auth-email-input"
               type="email"
               placeholder="name@example.com"
               value={email}
@@ -115,6 +117,7 @@ function AuthPageInner() {
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>PASSWORD</label>
             <div style={{ position: 'relative' }}>
               <input
+                data-testid="auth-password-input"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={password}
@@ -124,6 +127,7 @@ function AuthPageInner() {
                 style={{ width: '100%', padding: '0.75rem', paddingRight: '2.75rem', borderRadius: '8px', border: '1px solid #dadce0', fontSize: '1rem', outline: 'none' }}
               />
               <button
+                data-testid="auth-toggle-password"
                 type="button"
                 onClick={() => setShowPassword(p => !p)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
@@ -157,7 +161,7 @@ function AuthPageInner() {
               </button>
             </div>
             {mode === 'register' && (
-              <div style={{
+              <div data-testid="auth-password-hint" style={{
                 marginTop: '0.375rem',
                 fontSize: '0.75rem',
                 color: password.length === 0 ? '#5f6368' : password.length >= 6 ? '#1e8e3e' : '#d93025'
@@ -172,6 +176,7 @@ function AuthPageInner() {
           </div>
 
           <button
+            data-testid="auth-submit"
             type="submit"
             disabled={loading}
             style={{
@@ -196,6 +201,7 @@ function AuthPageInner() {
             <>
               Don't have an account?{' '}
               <button
+                data-testid="auth-switch-to-register"
                 onClick={() => setMode('register')}
                 style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 600, cursor: 'pointer', padding: 0 }}
               >
@@ -206,6 +212,7 @@ function AuthPageInner() {
             <>
               Already have an account?{' '}
               <button
+                data-testid="auth-switch-to-login"
                 onClick={() => setMode('login')}
                 style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 600, cursor: 'pointer', padding: 0 }}
               >
@@ -217,6 +224,7 @@ function AuthPageInner() {
 
         <div style={{ marginTop: '2rem', textAlign: 'center' }}>
           <button
+            data-testid="auth-back-home"
             onClick={() => router.push('/')}
             style={{ background: 'none', border: 'none', color: '#5f6368', cursor: 'pointer', fontSize: '0.875rem', textDecoration: 'underline' }}
           >
@@ -236,11 +244,12 @@ function AuthPageInner() {
             No account needed — just enter your name and join with a room code.
           </p>
           {guestError && (
-            <div style={{ color: '#d93025', background: '#fce8e6', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center' }}>
+            <div data-testid="auth-guest-error" style={{ color: '#d93025', background: '#fce8e6', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center' }}>
               {guestError}
             </div>
           )}
           <input
+            data-testid="auth-guest-name-input"
             type="text"
             placeholder="Your display name"
             value={guestName}
@@ -248,6 +257,7 @@ function AuthPageInner() {
             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #dadce0', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
           />
           <button
+            data-testid="auth-guest-submit"
             disabled={guestLoading || guestName.trim().length < 2}
             onClick={async () => {
               if (guestName.trim().length < 2) return;

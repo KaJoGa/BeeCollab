@@ -282,11 +282,12 @@ export default function Home() {
           {isLoggedIn ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {userName && (
-                <span style={{ fontSize: '0.875rem', color: isGuest ? '#e37400' : '#3c4043', fontWeight: 500 }}>
+                <span data-testid="home-user-name" style={{ fontSize: '0.875rem', color: isGuest ? '#e37400' : '#3c4043', fontWeight: 500 }}>
                   {isGuest ? '👤 Guest: ' : '👤 '}{userName}
                 </span>
               )}
               <button
+                data-testid="home-logout-btn"
                 className={styles.logoutBtn}
                 onClick={() => setShowLogoutConfirm(true)}
                 style={{ background: 'none', border: '1px solid #dadce0', color: '#d93025', fontWeight: 500, fontSize: '14px', cursor: 'pointer', padding: '8px 16px', borderRadius: '4px' }}
@@ -296,6 +297,7 @@ export default function Home() {
             </div>
           ) : (
             <button
+              data-testid="home-signin-btn"
               className={styles.loginBtn}
               onClick={() => router.push('/login')}
               style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 500, fontSize: '16px', cursor: 'pointer' }}
@@ -319,32 +321,33 @@ export default function Home() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>Meeting Name</label>
-                  <input type="text" value={newMeetingForm.title} onChange={e => setNewMeetingForm({ ...newMeetingForm, title: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
+                  <input data-testid="new-meeting-title" type="text" value={newMeetingForm.title} onChange={e => setNewMeetingForm({ ...newMeetingForm, title: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>Duration (minutes)</label>
-                    <input type="number" value={newMeetingForm.duration} onChange={e => setNewMeetingForm({ ...newMeetingForm, duration: parseInt(e.target.value) })} min="1" style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
+                    <input data-testid="new-meeting-duration" type="number" value={newMeetingForm.duration} onChange={e => setNewMeetingForm({ ...newMeetingForm, duration: parseInt(e.target.value) })} min="1" style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>Max. Participants</label>
-                    <input type="number" value={newMeetingForm.maxParticipants} onChange={e => setNewMeetingForm({ ...newMeetingForm, maxParticipants: parseInt(e.target.value) })} min="2" max="10" style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
+                    <input data-testid="new-meeting-max-participants" type="number" value={newMeetingForm.maxParticipants} onChange={e => setNewMeetingForm({ ...newMeetingForm, maxParticipants: parseInt(e.target.value) })} min="2" max="10" style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
                   </div>
                 </div>
                 {newMeetingError && (
-                  <div style={{ color: '#d93025', background: '#fce8e6', border: '1px solid #fad2cf', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem' }}>
+                  <div data-testid="new-meeting-error" style={{ color: '#d93025', background: '#fce8e6', border: '1px solid #fad2cf', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem' }}>
                     {newMeetingError}
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                  <button onClick={() => setIsCreating(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontWeight: 500, color: '#3c4043' }}>Cancel</button>
-                  <button onClick={handleCreateNewMeeting} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: 'none', background: '#1a73e8', color: 'white', cursor: 'pointer', fontWeight: 500 }}>Create</button>
+                  <button data-testid="new-meeting-cancel" onClick={() => setIsCreating(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontWeight: 500, color: '#3c4043' }}>Cancel</button>
+                  <button data-testid="new-meeting-submit" onClick={handleCreateNewMeeting} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: 'none', background: '#1a73e8', color: 'white', cursor: 'pointer', fontWeight: 500 }}>Create</button>
                 </div>
               </div>
             </div>
           ) : (
             <div className={styles.actionArea}>
               <button
+                data-testid="new-meeting-btn"
                 className={styles.newMeetingBtn}
                 onClick={() => {
                   if (isGuest) return;
@@ -372,6 +375,7 @@ export default function Home() {
                   </svg>
                 </span>
                 <input
+                  data-testid="join-code-input"
                   type="text"
                   placeholder="Enter a code or link"
                   className={styles.codeInput}
@@ -382,6 +386,7 @@ export default function Home() {
               </div>
 
               <button
+                data-testid="join-btn"
                 className={styles.joinBtn}
                 disabled={!meetingCode.trim()}
                 onClick={handleJoin}
@@ -400,6 +405,7 @@ export default function Home() {
                 <p style={{ fontSize: '0.875rem', color: '#5f6368', textAlign: 'center' }}>
                   No account?{' '}
                   <button
+                    data-testid="guest-join-open"
                     onClick={() => setShowGuestJoin(true)}
                     style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: '0.875rem' }}
                   >
@@ -410,6 +416,7 @@ export default function Home() {
                 <div style={{ background: '#f8f9fa', border: '1px solid #e1e4e8', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: '#202124' }}>Join as Guest</p>
                   <input
+                    data-testid="guest-name-input"
                     type="text"
                     placeholder="Your display name"
                     value={guestJoinName}
@@ -417,6 +424,7 @@ export default function Home() {
                     style={{ padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #dadce0', fontSize: '0.95rem', outline: 'none' }}
                   />
                   <input
+                    data-testid="guest-code-input"
                     type="text"
                     placeholder="Room code (e.g. A1B2C3D4)"
                     value={guestJoinCode}
@@ -425,13 +433,14 @@ export default function Home() {
                     style={{ padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #dadce0', fontSize: '0.95rem', outline: 'none', fontFamily: 'monospace', letterSpacing: '0.1em' }}
                   />
                   {guestJoinError && (
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#d93025' }}>{guestJoinError}</p>
+                    <p data-testid="guest-join-error" style={{ margin: 0, fontSize: '0.8rem', color: '#d93025' }}>{guestJoinError}</p>
                   )}
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => { setShowGuestJoin(false); setGuestJoinError(''); }} style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontSize: '0.875rem', color: '#5f6368' }}>
+                    <button data-testid="guest-join-cancel" onClick={() => { setShowGuestJoin(false); setGuestJoinError(''); }} style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontSize: '0.875rem', color: '#5f6368' }}>
                       Cancel
                     </button>
                     <button
+                      data-testid="guest-join-submit"
                       onClick={handleGuestJoin}
                       disabled={guestJoinLoading}
                       style={{ flex: 2, padding: '0.65rem', borderRadius: '8px', border: 'none', background: '#1a73e8', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem', opacity: guestJoinLoading ? 0.7 : 1 }}
@@ -476,7 +485,7 @@ export default function Home() {
         <span>{currentTime}</span>
       </div>
 
-      <div className={styles.statusIndicator}>
+      <div className={styles.statusIndicator} data-testid="server-status" data-status={serverStatus}>
         <div className={`${styles.statusDot} ${styles[serverStatus]}`}></div>
         <span>{serverStatus === 'checking' ? 'Connecting to server...' : serverStatus === 'online' ? 'System Online' : 'System Offline'}</span>
       </div>
@@ -485,6 +494,7 @@ export default function Home() {
         <div
           role="dialog"
           aria-modal="true"
+          data-testid="logout-confirm-dialog"
           onClick={() => setShowLogoutConfirm(false)}
           style={{
             position: 'fixed',
@@ -516,12 +526,14 @@ export default function Home() {
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
               <button
+                data-testid="logout-cancel"
                 onClick={() => setShowLogoutConfirm(false)}
                 style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontWeight: 500, color: '#3c4043', fontSize: '0.875rem' }}
               >
                 Cancel
               </button>
               <button
+                data-testid="logout-confirm"
                 onClick={performLogout}
                 style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: 'none', background: '#d93025', color: 'white', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem' }}
               >

@@ -1756,7 +1756,7 @@ export default function Meeting() {
       <style>{mobileStyles}</style>
 
       {isJoining && (
-        <div style={{
+        <div data-testid="joining-screen" style={{
           position: 'fixed',
           inset: 0,
           background: '#ffffff',
@@ -1831,6 +1831,7 @@ export default function Meeting() {
               Click once to allow playback.
             </p>
             <button
+              data-testid="enable-media-btn"
               onClick={resumeMediaPlayback}
               style={{
                 background: '#1a73e8',
@@ -1848,7 +1849,7 @@ export default function Meeting() {
         </div>
       )}
       {meetingEnded && (
-        <div className="meeting-ended-overlay" style={{
+        <div className="meeting-ended-overlay" data-testid="meeting-ended-overlay" data-end-type={meetingEndType} style={{
           position: 'fixed',
           inset: 0,
           background: '#ffffff',
@@ -1897,7 +1898,7 @@ export default function Meeting() {
               <span style={{ fontWeight: 500, fontSize: '1.6rem', letterSpacing: '-0.02em' }}>BeeCollab</span>
             </div>
 
-            <h1 className="meeting-ended-title" style={{
+            <h1 className="meeting-ended-title" data-testid="meeting-ended-title" style={{
               fontSize: '2.75rem',
               fontWeight: 400,
               color: '#202124',
@@ -1914,6 +1915,7 @@ export default function Meeting() {
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
               <button
+                data-testid="meeting-ended-home"
                 onClick={() => router.push('/')}
                 style={{
                   background: '#1a73e8',
@@ -1941,6 +1943,7 @@ export default function Meeting() {
 
               {meetingEndType === 'kicked' && (
                 <button
+                  data-testid="meeting-ended-rejoin"
                   style={{ background: 'none', border: 'none', color: '#1a73e8', fontSize: '14px', fontWeight: 500, cursor: 'pointer', opacity: 0.8 }}
                   onClick={() => window.location.reload()}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
@@ -1954,33 +1957,33 @@ export default function Meeting() {
         </div>
       )}
       {isInfoOpen && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div data-testid="info-modal" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: '1.5rem', borderRadius: '14px', width: '90%', maxWidth: '360px', boxShadow: '0 12px 30px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>Meeting Info</h3>
-              <button onClick={() => setIsInfoOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label="Close info">
+              <button data-testid="info-close" onClick={() => setIsInfoOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label="Close info">
                 <X size={18} />
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', color: '#3c4043' }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>Meeting name</div>
-                <div style={{ fontWeight: 600 }}>{meetingInfo?.title || 'Meeting'}</div>
+                <div data-testid="info-meeting-title" style={{ fontWeight: 600 }}>{meetingInfo?.title || 'Meeting'}</div>
               </div>
               <div>
                 <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>Meeting code</div>
-                <div style={{ fontWeight: 600, fontFamily: 'monospace' }}>{meetingInfo?.roomCode || meetingId}</div>
+                <div data-testid="info-room-code" style={{ fontWeight: 600, fontFamily: 'monospace' }}>{meetingInfo?.roomCode || meetingId}</div>
               </div>
             </div>
           </div>
         </div>
       )}
       {isDeviceSettingsOpen && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 46, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div data-testid="device-settings-modal" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 46, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: '1.5rem', borderRadius: '14px', width: '92%', maxWidth: '420px', boxShadow: '0 12px 30px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>Device Settings</h3>
-              <button onClick={() => setIsDeviceSettingsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label="Close device settings">
+              <button data-testid="device-close" onClick={() => setIsDeviceSettingsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label="Close device settings">
                 <X size={18} />
               </button>
             </div>
@@ -1988,6 +1991,7 @@ export default function Meeting() {
               <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#3c4043' }}>
                 <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Microphone</span>
                 <select
+                  data-testid="device-audio-select"
                   value={selectedAudioDeviceId}
                   onChange={(e) => setSelectedAudioDeviceId(e.target.value)}
                   style={{ padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid #dadce0', fontSize: '0.9rem' }}
@@ -2003,6 +2007,7 @@ export default function Meeting() {
               <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#3c4043' }}>
                 <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Camera</span>
                 <select
+                  data-testid="device-video-select"
                   value={selectedVideoDeviceId}
                   onChange={(e) => setSelectedVideoDeviceId(e.target.value)}
                   style={{ padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid #dadce0', fontSize: '0.9rem' }}
@@ -2017,12 +2022,14 @@ export default function Meeting() {
               </label>
               <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
                 <button
+                  data-testid="device-cancel"
                   onClick={() => setIsDeviceSettingsOpen(false)}
                   style={{ background: '#e5e7eb', border: 'none', color: '#111827', borderRadius: '10px', padding: '0.6rem 1rem', cursor: 'pointer', fontWeight: 600 }}
                 >
                   Cancel
                 </button>
                 <button
+                  data-testid="device-apply"
                   onClick={async () => {
                     await applyDeviceSelection();
                     setIsDeviceSettingsOpen(false);
@@ -2051,6 +2058,7 @@ export default function Meeting() {
         borderBottom: '1px solid rgba(255,255,255,0.08)'
       }}>
         <button
+          data-testid="mobile-info-btn"
           onClick={() => setIsInfoOpen(true)}
           aria-label="Meeting info"
           style={{
@@ -2095,6 +2103,7 @@ export default function Meeting() {
 
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <button
+            data-testid="mobile-leave-btn"
             onClick={() => setIsLeaveMenuOpen((prev) => !prev)}
             aria-label="Leave meeting"
             style={{
@@ -2132,14 +2141,14 @@ export default function Meeting() {
                 <button onClick={() => {
                   if (socket) socket.emit('meeting:end', { meetingId });
                   setIsLeaveMenuOpen(false);
-                }} style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>
+                }} data-testid="mobile-end-meeting" style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>
                   End Meeting
                 </button>
               )}
               <button onClick={() => {
                 setIsLeaveMenuOpen(false);
                 router.push('/');
-              }} style={{ background: '#374151', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>
+              }} data-testid="mobile-leave-meeting" style={{ background: '#374151', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>
                 Leave Meeting
               </button>
             </div>
@@ -2178,7 +2187,7 @@ export default function Meeting() {
                 position: 'relative'
               }}>
                 {[screenShareItem].map((p: any) => (
-                  <div key={p.id} style={{
+                  <div key={p.id} data-testid="screen-share-tile" data-name={p.name} style={{
                     width: '100%',
                     height: '100%',
                     position: 'relative',
@@ -2191,9 +2200,9 @@ export default function Meeting() {
                     justifyContent: 'center'
                   }}>
                     {p.isLocal ? (
-                      <video ref={bindVideo(screenStreamRef.current)} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <video data-testid="screen-video" ref={bindVideo(screenStreamRef.current)} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     ) : (
-                      <video ref={bindVideo(p.stream || null)} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <video data-testid="screen-video" ref={bindVideo(p.stream || null)} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     )}
                     <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', background: 'rgba(0,0,0,0.6)', padding: '4px 12px', borderRadius: '8px', color: 'white', fontSize: '0.8rem', fontWeight: 500, backdropFilter: 'blur(4px)' }}>
                       {p.name}
@@ -2224,7 +2233,7 @@ export default function Meeting() {
                   const isAudioEnabled = p.isLocal ? mediaEnabled.audio : (p.audioEnabled ?? true);
 
                   return (
-                    <div key={p.id} style={{
+                    <div key={p.id} data-testid="video-tile" data-local={p.isLocal ? 'true' : 'false'} data-name={p.name} style={{
                       flexShrink: 0,
                       width: window.innerWidth < 1024 ? '180px' : '100%',
                       aspectRatio: '16/9',
@@ -2237,9 +2246,9 @@ export default function Meeting() {
                       transition: 'all 0.2s ease'
                     }}>
                       {p.isLocal ? (
-                        <video ref={bindVideo(localStream)} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)', position: 'absolute', top: 0, left: 0, opacity: isVideoEnabled ? 1 : 0 }} />
+                        <video data-testid="tile-video" ref={bindVideo(localStream)} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)', position: 'absolute', top: 0, left: 0, opacity: isVideoEnabled ? 1 : 0 }} />
                       ) : (
-                        <video ref={bindVideo(p.stream || null)} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: isVideoEnabled ? 1 : 0 }} />
+                        <video data-testid="tile-video" ref={bindVideo(p.stream || null)} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: isVideoEnabled ? 1 : 0 }} />
                       )}
                       {!isVideoEnabled && (
                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2c3e50', color: 'white', fontSize: '1.2rem', fontWeight: 600 }}>
@@ -2247,12 +2256,12 @@ export default function Meeting() {
                         </div>
                       )}
                       <div style={{ position: 'absolute', bottom: '0.5rem', left: '0.5rem', right: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 5 }}>
-                        <div style={{ color: 'white', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', maxWidth: '80%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backdropFilter: 'blur(4px)' }}>
+                        <div data-testid="tile-name" style={{ color: 'white', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', maxWidth: '80%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backdropFilter: 'blur(4px)' }}>
                           {p.name}
                         </div>
-                        {!isAudioEnabled && <MicOff size={12} color={colors.red} style={{ background: 'rgba(0,0,0,0.5)', padding: '2px', borderRadius: '50%' }} />}
+                        {!isAudioEnabled && <MicOff data-testid="tile-muted" size={12} color={colors.red} style={{ background: 'rgba(0,0,0,0.5)', padding: '2px', borderRadius: '50%' }} />}
                       </div>
-                      {showHand && <div style={{ position: 'absolute', top: '0.5rem', left: '0.5rem', zIndex: 5 }}><span style={{ fontSize: '14px' }}>✋</span></div>}
+                      {showHand && <div data-testid="tile-hand" style={{ position: 'absolute', top: '0.5rem', left: '0.5rem', zIndex: 5 }}><span style={{ fontSize: '14px' }}>✋</span></div>}
                     </div>
                   );
                 })}
@@ -2281,7 +2290,7 @@ export default function Meeting() {
                 const showVideo = isVideoEnabled && !(audioOnly && !p.isLocal);
 
                 return (
-                  <div key={p.id} className="participant-card" style={{
+                  <div key={p.id} className="participant-card" data-testid="video-tile" data-local={p.isLocal ? 'true' : 'false'} data-name={p.name} style={{
                     position: 'relative',
                     background: colors.bgDarkNavy,
                     borderRadius: '20px',
@@ -2302,9 +2311,9 @@ export default function Meeting() {
                       : 'span 2',
                   }}>
                     {p.isLocal ? (
-                      <video ref={bindVideo(localStream)} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)', position: 'absolute', top: 0, left: 0, opacity: showVideo ? 1 : 0 }} />
+                      <video data-testid="tile-video" ref={bindVideo(localStream)} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)', position: 'absolute', top: 0, left: 0, opacity: showVideo ? 1 : 0 }} />
                     ) : (
-                      <video ref={bindVideo(p.stream || null)} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: showVideo ? 1 : 0 }} />
+                      <video data-testid="tile-video" ref={bindVideo(p.stream || null)} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: showVideo ? 1 : 0 }} />
                     )}
                     {!showVideo && (
                       <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#31415e', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '2px solid rgba(255,255,255,0.1)' }}>
@@ -2314,7 +2323,7 @@ export default function Meeting() {
 
                     {/* Connection quality — local user only */}
                     {p.isLocal && (
-                      <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                      <div data-testid="conn-stats" style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '8px', backdropFilter: 'blur(4px)' }}>
                           <ConnectionBars bars={connStats.bars} />
                           <span style={{ color: 'white', fontSize: '0.7rem', fontWeight: 600 }}>
@@ -2328,18 +2337,18 @@ export default function Meeting() {
                     )}
 
                     <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', right: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10 }}>
-                      <div className="name-badge" style={{ color: 'white', background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '10px', fontSize: '0.85rem', maxWidth: '70%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backdropFilter: 'blur(4px)' }}>
+                      <div className="name-badge" data-testid="tile-name" style={{ color: 'white', background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '10px', fontSize: '0.85rem', maxWidth: '70%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backdropFilter: 'blur(4px)' }}>
                         {p.name}
                       </div>
                       {!isAudioEnabled && (
-                        <div style={{ background: 'rgba(0,0,0,0.5)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+                        <div data-testid="tile-muted" style={{ background: 'rgba(0,0,0,0.5)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
                           <MicOff size={16} color={colors.red} />
                         </div>
                       )}
                     </div>
 
                     {showHand && (
-                      <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10, animation: 'bounce 2s infinite' }}>
+                      <div data-testid="tile-hand" style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10, animation: 'bounce 2s infinite' }}>
                         <span style={{ fontSize: '24px' }}>✋</span>
                       </div>
                     )}
@@ -2352,15 +2361,15 @@ export default function Meeting() {
 
         {/* Sidebar */}
         {activeTab && (
-          <div className={`sidebar-container sidebar-${activeTab}`} style={{ width: '360px', background: 'linear-gradient(180deg, #f7f8fb 0%, #eef1f6 100%)', color: '#2b2f38', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(0,0,0,0.06)', flexShrink: 0, zIndex: 10, boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)', borderTopLeftRadius: '24px', borderBottomLeftRadius: '24px', overflow: 'hidden' }}>
+          <div className={`sidebar-container sidebar-${activeTab}`} data-testid="sidebar" data-tab={activeTab} style={{ width: '360px', background: 'linear-gradient(180deg, #f7f8fb 0%, #eef1f6 100%)', color: '#2b2f38', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(0,0,0,0.06)', flexShrink: 0, zIndex: 10, boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)', borderTopLeftRadius: '24px', borderBottomLeftRadius: '24px', overflow: 'hidden' }}>
             <div style={{ display: 'flex', padding: '1.1rem 1.25rem', alignItems: 'center', justifyContent: 'space-between', background: '#ffffff', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f3b64' }}>
+              <span data-testid="sidebar-title" style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f3b64' }}>
                 {activeTab === 'people' ? `Participants (${participants.length})` :
                  activeTab === 'chat' ? 'Chat' :
                  activeTab === 'agenda' ? 'Meeting Agenda' :
                  activeTab === 'polls' ? 'Polls' : ''}
               </span>
-              <button onClick={() => setActiveTab(null)} style={{ background: '#eef2f7', border: 'none', cursor: 'pointer', color: '#6b7280', width: '36px', height: '36px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button data-testid="sidebar-close" onClick={() => setActiveTab(null)} style={{ background: '#eef2f7', border: 'none', cursor: 'pointer', color: '#6b7280', width: '36px', height: '36px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={24} />
               </button>
             </div>
@@ -2384,6 +2393,7 @@ export default function Meeting() {
                   }
                 `}</style>
                 <div
+                  data-testid="chat-messages"
                   ref={chatContainerRef}
                   className="custom-scrollbar"
                   style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
@@ -2391,7 +2401,7 @@ export default function Meeting() {
                   {messages.map((m, i) => {
                     const isMe = m.senderId === localStorage.getItem('token'); // Simplification for demo
                     return (
-                      <div key={i} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', gap: '0.75rem', alignItems: 'flex-start' }}>
+                      <div key={i} data-testid="chat-message" data-sender={m.sender?.name || ''} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', gap: '0.75rem', alignItems: 'flex-start' }}>
                         <div style={{ width: '34px', height: '34px', borderRadius: '12px', background: '#1f3b64', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.875rem', boxShadow: '0 4px 10px rgba(15, 23, 42, 0.15)' }}>
                           {m.sender?.name?.charAt(0) || 'U'}
                         </div>
@@ -2409,7 +2419,7 @@ export default function Meeting() {
                               </>
                             )}
                           </div>
-                          <div style={{ background: isMe ? '#214e6f' : '#6f7686', color: 'white', padding: '0.75rem 1rem', borderRadius: '16px', borderTopRightRadius: isMe ? '6px' : '16px', borderTopLeftRadius: !isMe ? '6px' : '16px', fontSize: '0.875rem', lineHeight: '1.5', boxShadow: '0 8px 18px rgba(15, 23, 42, 0.12)', wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', maxWidth: '100%' }}>
+                          <div data-testid="chat-message-text" style={{ background: isMe ? '#214e6f' : '#6f7686', color: 'white', padding: '0.75rem 1rem', borderRadius: '16px', borderTopRightRadius: isMe ? '6px' : '16px', borderTopLeftRadius: !isMe ? '6px' : '16px', fontSize: '0.875rem', lineHeight: '1.5', boxShadow: '0 8px 18px rgba(15, 23, 42, 0.12)', wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap', maxWidth: '100%' }}>
                             {m.message}
                           </div>
                         </div>
@@ -2420,13 +2430,14 @@ export default function Meeting() {
                 <form onSubmit={sendChat} style={{ padding: '1rem 1.25rem 1.5rem' }}>
                   <div style={{ background: '#ffffff', borderRadius: '16px', display: 'flex', alignItems: 'center', padding: '0.5rem 0.75rem 0.5rem 1rem', boxShadow: '0 10px 20px rgba(15, 23, 42, 0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
                     <input
+                      data-testid="chat-input"
                       type="text"
                       value={chatInput}
                       onChange={e => setChatInput(e.target.value)}
                       placeholder="Type a message..."
                       style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#111827', fontSize: '0.9rem' }}
                     />
-                    <button type="submit" disabled={!chatInput.trim()} style={{ background: chatInput.trim() ? '#1f3b64' : '#e5e7eb', border: 'none', cursor: chatInput.trim() ? 'pointer' : 'default', color: chatInput.trim() ? 'white' : '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', borderRadius: '12px' }}>
+                    <button data-testid="chat-send" type="submit" disabled={!chatInput.trim()} style={{ background: chatInput.trim() ? '#1f3b64' : '#e5e7eb', border: 'none', cursor: chatInput.trim() ? 'pointer' : 'default', color: chatInput.trim() ? 'white' : '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', borderRadius: '12px' }}>
                       <Send size={20} />
                     </button>
                   </div>
@@ -2447,6 +2458,7 @@ export default function Meeting() {
                     {newAgendaItems.map((item, i) => (
                       <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                         <input
+                          data-testid="agenda-title-input"
                           type="text"
                           placeholder="Title"
                           value={item.title}
@@ -2458,6 +2470,7 @@ export default function Meeting() {
                           style={{ flex: 2, padding: '0.5rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.85rem' }}
                         />
                         <input
+                          data-testid="agenda-duration-input"
                           type="number"
                           placeholder="Sec"
                           value={item.duration}
@@ -2471,12 +2484,14 @@ export default function Meeting() {
                       </div>
                     ))}
                     <button
+                      data-testid="agenda-add-item"
                       onClick={() => setNewAgendaItems([...newAgendaItems, { title: '', duration: 60 }])}
                       style={{ width: '100%', padding: '0.5rem', border: '1px dashed #3b82f6', color: '#3b82f6', background: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1rem' }}
                     >
                       + Add Item
                     </button>
                     <button
+                      data-testid="agenda-save"
                       onClick={() => {
                         const items = newAgendaItems.filter(it => it.title.trim());
                         if (items.length === 0) return;
@@ -2493,7 +2508,7 @@ export default function Meeting() {
                 {activeAgenda && (
                   <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)' }}>
                     <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Current Item</h3>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1f3b64', marginBottom: '1rem' }}>{activeAgenda.title}</div>
+                    <div data-testid="agenda-current" style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1f3b64', marginBottom: '1rem' }}>{activeAgenda.title}</div>
                     <div style={{ height: '8px', background: '#eef2f7', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ height: '100%', background: '#3b82f6', width: '45%', transition: 'width 1s linear' }}></div>
                     </div>
@@ -2506,7 +2521,7 @@ export default function Meeting() {
                     <p style={{ color: '#8f95a3', fontSize: '0.875rem' }}>No agenda items set for this meeting.</p>
                   ) : (
                     agendas.map((item, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: item.isActive ? '#eff6ff' : 'white', borderRadius: '12px', border: item.isActive ? '1px solid #bfdbfe' : '1px solid rgba(0,0,0,0.05)' }}>
+                      <div key={i} data-testid="agenda-item" data-active={item.isActive ? 'true' : 'false'} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: item.isActive ? '#eff6ff' : 'white', borderRadius: '12px', border: item.isActive ? '1px solid #bfdbfe' : '1px solid rgba(0,0,0,0.05)' }}>
                         <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: item.isActive ? '#3b82f6' : '#f3f4f6', color: item.isActive ? 'white' : '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>{i + 1}</div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{item.title}</div>
@@ -2514,6 +2529,7 @@ export default function Meeting() {
                         </div>
                         {(isHost || isCoHost) && !item.isActive && (
                           <button
+                            data-testid="agenda-start"
                             onClick={() => socket?.emit('agenda:start', { meetingId, agendaId: item.id })}
                             style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0.4rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer' }}
                           >
@@ -2534,6 +2550,7 @@ export default function Meeting() {
                   <div style={{ background: '#ffffff', padding: '1rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)' }}>
                     <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600 }}>Create Poll</h3>
                     <input
+                      data-testid="poll-question-input"
                       type="text"
                       placeholder="Question"
                       value={newPollQuestion}
@@ -2542,6 +2559,7 @@ export default function Meeting() {
                     />
                     {newPollOptions.map((opt, i) => (
                       <input
+                        data-testid="poll-option-input"
                         key={i}
                         type="text"
                         placeholder={`Option ${i + 1}`}
@@ -2555,12 +2573,14 @@ export default function Meeting() {
                       />
                     ))}
                     <button
+                      data-testid="poll-add-option"
                       onClick={() => setNewPollOptions([...newPollOptions, ''])}
                       style={{ width: '100%', padding: '0.5rem', border: '1px dashed #3b82f6', color: '#3b82f6', background: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1rem' }}
                     >
                       + Add Option
                     </button>
                     <button
+                      data-testid="poll-launch"
                       onClick={() => {
                         if (!newPollQuestion.trim()) return;
                         socket?.emit('poll:create', { meetingId, question: newPollQuestion, options: newPollOptions.filter(o => o.trim()) });
@@ -2582,7 +2602,7 @@ export default function Meeting() {
                     polls.map((poll) => {
                       const totalVotes = poll.options.reduce((sum: number, opt: any) => sum + (opt.responses?.length || 0), 0);
                       return (
-                        <div key={poll.id} style={{ background: 'white', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                        <div key={poll.id} data-testid="poll-card" style={{ background: 'white', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
                           <div style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem' }}>{poll.question}</div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             {poll.options.map((opt: any) => {
@@ -2590,6 +2610,7 @@ export default function Meeting() {
                               const percentage = totalVotes === 0 ? 0 : Math.round((voteCount / totalVotes) * 100);
                               return (
                                 <button
+                                  data-testid="poll-option"
                                   key={opt.id}
                                   onClick={() => socket?.emit('poll:vote', { meetingId, pollId: poll.id, optionId: opt.id })}
                                   style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative' }}
@@ -2605,7 +2626,7 @@ export default function Meeting() {
                               );
                             })}
                           </div>
-                          <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center' }}>{totalVotes} total votes</div>
+                          <div data-testid="poll-total-votes" style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center' }}>{totalVotes} total votes</div>
                         </div>
                       );
                     })
@@ -2618,6 +2639,7 @@ export default function Meeting() {
               <div style={{ padding: '1rem 1.25rem 1.5rem', flex: 1, overflowY: 'auto' }}>
                 <div style={{ marginBottom: '1rem' }}>
                   <input
+                    data-testid="people-search"
                     type="text"
                     value={peopleSearch}
                     onChange={(e) => setPeopleSearch(e.target.value)}
@@ -2671,7 +2693,7 @@ export default function Meeting() {
                       (myRole === 'HOST' || (myRole === 'CO_HOST' && !isHostLabel));
 
                     return (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                      <div key={i} data-testid="participant-row" data-name={name} data-me={isMe ? 'true' : 'false'} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1f3b64', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
                           {name.charAt(0).toUpperCase()}
                         </div>
@@ -2686,6 +2708,7 @@ export default function Meeting() {
                           {canManageParticipant && (
                             <>
                               <button
+                                data-testid="participant-actions-btn"
                                 onClick={() => setOpenParticipantMenuUserId((prev) => (prev === p.userId ? null : p.userId))}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                 aria-label="Participant actions"
@@ -2699,7 +2722,7 @@ export default function Meeting() {
                                     <button onClick={() => {
                                       if (socket) socket.emit('meeting:kick', { meetingId, targetSocketId: p.socketId });
                                       setOpenParticipantMenuUserId(null);
-                                    }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+                                    }} data-testid="participant-kick" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
                                       Kick participant
                                     </button>
                                   )}
@@ -2707,14 +2730,14 @@ export default function Meeting() {
                                     <button onClick={() => {
                                       if (socket) socket.emit('media:force-mute', { meetingId, targetSocketId: p.socketId });
                                       setOpenParticipantMenuUserId(null);
-                                    }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+                                    }} data-testid="participant-mute" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
                                       Mute user
                                     </button>
                                   ) : (
                                     <button onClick={() => {
                                       if (socket) socket.emit('media:ask-unmute', { meetingId, targetSocketId: p.socketId });
                                       setOpenParticipantMenuUserId(null);
-                                    }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+                                    }} data-testid="participant-ask-unmute" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
                                       Ask to unmute
                                     </button>
                                   )}
@@ -2722,7 +2745,7 @@ export default function Meeting() {
                                     <button onClick={() => {
                                       if (socket) socket.emit('meeting:make-cohost', { meetingId, targetUserId: p.userId });
                                       setOpenParticipantMenuUserId(null);
-                                    }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+                                    }} data-testid="participant-make-cohost" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
                                       Make co-host
                                     </button>
                                   )}
@@ -2730,7 +2753,7 @@ export default function Meeting() {
                                     <button onClick={() => {
                                       if (socket) socket.emit('meeting:remove-cohost', { meetingId, targetUserId: p.userId });
                                       setOpenParticipantMenuUserId(null);
-                                    }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+                                    }} data-testid="participant-remove-cohost" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
                                       Remove co-host
                                     </button>
                                   )}
@@ -2754,21 +2777,23 @@ export default function Meeting() {
 
         <div className="bottom-bar-info" style={{ width: '250px', fontSize: '1rem', fontWeight: 500, display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <span>{currentTime}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', background: 'rgba(0,0,0,0.35)', padding: '0.2rem 0.6rem', borderRadius: '999px', color: '#f1f3f4' }}>
+          <div data-testid="connection-status" data-connected={isConnected} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', background: 'rgba(0,0,0,0.35)', padding: '0.2rem 0.6rem', borderRadius: '999px', color: '#f1f3f4' }}>
             <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: isConnected ? '#22c55e' : '#eab308' }}></span>
             {isConnected ? 'Connected' : 'Connecting...'}
           </div>
         </div>
 
         <div className="controls-container" style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={() => toggleMedia('audio')} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: mediaEnabled.audio ? colors.bgDarkNavy : colors.bgDarkNavy, color: mediaEnabled.audio ? 'white' : colors.red, transition: 'all 0.2s' }}>
+          <button data-testid="ctrl-mic" data-enabled={mediaEnabled.audio} onClick={() => toggleMedia('audio')} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: mediaEnabled.audio ? colors.bgDarkNavy : colors.bgDarkNavy, color: mediaEnabled.audio ? 'white' : colors.red, transition: 'all 0.2s' }}>
             {mediaEnabled.audio ? <Mic size={20} /> : <MicOff size={20} />}
           </button>
-          <button onClick={() => toggleMedia('video')} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: mediaEnabled.video ? colors.bgDarkNavy : colors.bgDarkNavy, color: mediaEnabled.video ? 'white' : colors.red, transition: 'all 0.2s' }}>
+          <button data-testid="ctrl-camera" data-enabled={mediaEnabled.video} onClick={() => toggleMedia('video')} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: mediaEnabled.video ? colors.bgDarkNavy : colors.bgDarkNavy, color: mediaEnabled.video ? 'white' : colors.red, transition: 'all 0.2s' }}>
             {mediaEnabled.video ? <Video size={20} /> : <VideoOff size={20} />}
           </button>
 
           <button
+            data-testid="ctrl-data-saver"
+            data-active={audioOnly}
             onClick={toggleAudioOnly}
             className="control-btn"
             title={audioOnly ? 'Data saver ON — remote video paused. Click to resume.' : 'Data saver — stop downloading remote video to save bandwidth'}
@@ -2777,16 +2802,16 @@ export default function Meeting() {
             <Gauge size={20} />
           </button>
 
-          <button onClick={toggleHandRaise} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isHandRaised ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}>
+          <button data-testid="ctrl-hand" data-active={isHandRaised} onClick={toggleHandRaise} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isHandRaised ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}>
             {isHandRaised ? <Hand size={20} /> : <Hand size={20} />}
           </button>
           
           <div style={{ position: 'relative' }}>
-            <button onClick={() => sendReaction('❤️')} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}>
+            <button data-testid="ctrl-reaction" onClick={() => sendReaction('❤️')} className="control-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}>
               <Smile size={20} />
             </button>
             {reactions.length > 0 && (
-              <div style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.7)', padding: '0.5rem', borderRadius: '20px', backdropFilter: 'blur(8px)', zIndex: 100 }}>
+              <div data-testid="reaction-summary" style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.7)', padding: '0.5rem', borderRadius: '20px', backdropFilter: 'blur(8px)', zIndex: 100 }}>
                 {reactions.map((r, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.9rem' }}>
                     <span>{r.type}</span>
@@ -2797,13 +2822,14 @@ export default function Meeting() {
             )}
           </div>
 
-          <button onClick={toggleScreenShare} className="control-btn screen-share-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isScreenSharing ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}>
+          <button data-testid="ctrl-screen-share" data-active={isScreenSharing} onClick={toggleScreenShare} className="control-btn screen-share-btn" style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isScreenSharing ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}>
             <MonitorUp size={20} />
           </button>
 
           {/* Mobile-only inline buttons (chat + people). Hidden on desktop via inline style; shown via mobile CSS. */}
           <button
             onClick={() => setActiveTab(activeTab === 'agenda' ? null : 'agenda')}
+            data-testid="ctrl-mobile-agenda"
             className="control-btn mobile-action-btn"
             aria-label="Agenda"
             style={{ display: 'none', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'agenda' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
@@ -2812,6 +2838,7 @@ export default function Meeting() {
           </button>
           <button
             onClick={() => setActiveTab(activeTab === 'polls' ? null : 'polls')}
+            data-testid="ctrl-mobile-polls"
             className="control-btn mobile-action-btn"
             aria-label="Polls"
             style={{ display: 'none', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'polls' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
@@ -2820,6 +2847,7 @@ export default function Meeting() {
           </button>
           <button
             onClick={() => setActiveTab(activeTab === 'chat' ? null : 'chat')}
+            data-testid="ctrl-mobile-chat"
             className="control-btn mobile-action-btn"
             aria-label="Chat"
             style={{ display: 'none', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'chat' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
@@ -2828,18 +2856,20 @@ export default function Meeting() {
           </button>
           <button
             onClick={() => setActiveTab(activeTab === 'people' ? null : 'people')}
+            data-testid="ctrl-mobile-people"
             className="control-btn mobile-action-btn"
             aria-label="People"
             style={{ display: 'none', position: 'relative', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'people' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
           >
             <Users size={20} />
-            <span style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#8ab4f8', color: '#202124', fontSize: '0.6rem', fontWeight: 'bold', minWidth: '14px', height: '14px', padding: '0 3px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span data-testid="mobile-participant-count" style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#8ab4f8', color: '#202124', fontSize: '0.6rem', fontWeight: 'bold', minWidth: '14px', height: '14px', padding: '0 3px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {displayParticipants.length}
             </span>
           </button>
           <div style={{ position: 'relative' }}>
             <button
               data-kebab-menu-button="true"
+              data-testid="ctrl-more"
               onClick={() => setIsMoreMenuOpen((prev) => !prev)}
               className="control-btn"
               style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
@@ -2862,13 +2892,14 @@ export default function Meeting() {
                 boxShadow: '0 10px 24px rgba(0,0,0,0.3)',
                 zIndex: 50
               }}>
-                <button onClick={() => {
+                <button data-testid="more-settings" onClick={() => {
                   setIsDeviceSettingsOpen(true);
                   setIsMoreMenuOpen(false);
                 }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.55rem 0.75rem', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
                   Settings
                 </button>
                 <button
+                  data-testid="more-screen-share"
                   className="mobile-menu-item"
                   onClick={() => {
                     toggleScreenShare();
@@ -2884,17 +2915,17 @@ export default function Meeting() {
         </div>
 
         <div className="bottom-bar-actions" style={{ width: '250px', display: 'flex', justifyContent: 'flex-end', gap: '1rem', color: '#e4e6ea', position: 'relative' }}>
-          <button onClick={() => setIsInfoOpen(true)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}><Info size={20} /></button>
-          <button onClick={() => setActiveTab(activeTab === 'agenda' ? null : 'agenda')} style={{ background: 'none', border: 'none', color: activeTab === 'agenda' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><ListChecks size={20} /></button>
-          <button onClick={() => setActiveTab(activeTab === 'polls' ? null : 'polls')} style={{ background: 'none', border: 'none', color: activeTab === 'polls' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><BarChart3 size={20} /></button>
-          <button onClick={() => setActiveTab(activeTab === 'people' ? null : 'people')} style={{ position: 'relative', background: 'none', border: 'none', color: activeTab === 'people' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}>
+          <button data-testid="ctrl-info" onClick={() => setIsInfoOpen(true)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}><Info size={20} /></button>
+          <button data-testid="ctrl-tab-agenda" onClick={() => setActiveTab(activeTab === 'agenda' ? null : 'agenda')} style={{ background: 'none', border: 'none', color: activeTab === 'agenda' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><ListChecks size={20} /></button>
+          <button data-testid="ctrl-tab-polls" onClick={() => setActiveTab(activeTab === 'polls' ? null : 'polls')} style={{ background: 'none', border: 'none', color: activeTab === 'polls' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><BarChart3 size={20} /></button>
+          <button data-testid="ctrl-tab-people" onClick={() => setActiveTab(activeTab === 'people' ? null : 'people')} style={{ position: 'relative', background: 'none', border: 'none', color: activeTab === 'people' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}>
             <Users size={20} />
-            <span style={{ position: 'absolute', top: '-6px', right: '-8px', background: '#8ab4f8', color: '#202124', fontSize: '0.6rem', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span data-testid="participant-count" style={{ position: 'absolute', top: '-6px', right: '-8px', background: '#8ab4f8', color: '#202124', fontSize: '0.6rem', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {displayParticipants.length}
             </span>
           </button>
-          <button onClick={() => setActiveTab(activeTab === 'chat' ? null : 'chat')} style={{ background: 'none', border: 'none', color: activeTab === 'chat' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><MessageSquare size={20} /></button>
-          <button onClick={() => setIsLeaveMenuOpen((prev) => !prev)} title="Leave options" className="leave-btn" style={{ background: colors.red, border: 'none', color: 'white', cursor: 'pointer', width: '64px', height: '44px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button data-testid="ctrl-tab-chat" onClick={() => setActiveTab(activeTab === 'chat' ? null : 'chat')} style={{ background: 'none', border: 'none', color: activeTab === 'chat' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><MessageSquare size={20} /></button>
+          <button data-testid="ctrl-leave" onClick={() => setIsLeaveMenuOpen((prev) => !prev)} title="Leave options" className="leave-btn" style={{ background: colors.red, border: 'none', color: 'white', cursor: 'pointer', width: '64px', height: '44px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <PhoneOff size={20} />
           </button>
           {isLeaveMenuOpen && (
@@ -2903,14 +2934,14 @@ export default function Meeting() {
                 <button onClick={() => {
                   if (socket) socket.emit('meeting:end', { meetingId });
                   setIsLeaveMenuOpen(false);
-                }} style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                }} data-testid="leave-end-meeting" style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                   End Meeting
                 </button>
               )}
               <button onClick={() => {
                 setIsLeaveMenuOpen(false);
                 router.push('/');
-              }} style={{ background: '#374151', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              }} data-testid="leave-leave-meeting" style={{ background: '#374151', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                 Leave Meeting
               </button>
             </div>
@@ -2920,6 +2951,7 @@ export default function Meeting() {
       </div>
       {showAutoplayOverlay && (
         <div
+          data-testid="autoplay-overlay"
           style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.9)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', textAlign: 'center', padding: '2rem' }}
         >
           <div style={{ background: colors.bgDarkNavy, padding: '2.5rem', borderRadius: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', maxWidth: '400px', width: '100%' }}>
@@ -2931,6 +2963,7 @@ export default function Meeting() {
               <p style={{ margin: 0, color: '#8f95a3', fontSize: '0.875rem', lineHeight: '1.5' }}>The browser blocked autoplay. Click the button below to enable audio and video.</p>
             </div>
             <button
+              data-testid="autoplay-enable-btn"
               onClick={async (event) => {
                 event.stopPropagation();
                 const videos = document.querySelectorAll('video');
