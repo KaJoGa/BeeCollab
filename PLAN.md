@@ -52,12 +52,12 @@ Hosting research (checked 2026-10-07; third-party sources, re-verify before sign
 | HTTPS/WSS | Provided by Render / Vercel (`*.onrender.com`, `*.vercel.app`) | No custom domain needed. Camera/mic need HTTPS and the HTTPS frontend needs WSS; both are satisfied by default. |
 
 - [x] Hosting decision: Option B (see Decisions)
-- [ ] **Owner:** create accounts and hand back values — see [SETUP.md](SETUP.md) (Neon, Render, Vercel, Cloudflare TURN)
+- [x] **Owner:** Neon, Cloudflare TURN and Render done (2026-10-07). Remaining: Vercel deploy, then set `FRONTEND_ORIGIN` on Render (CORS is still `*`).
 - [x] TURN (code done 2026-10-07; needs real Cloudflare creds on Render to be exercised): backend endpoint (e.g. `GET /webrtc/ice-servers`, JWT incl. guests) calls `POST https://rtc.live.cloudflare.com/v1/turn/keys/$CF_TURN_KEY_ID/credentials/generate-ice-servers` with `Authorization: Bearer $CF_TURN_API_TOKEN`, body `{"ttl": 86400}` (max 48 h), returns `iceServers` (201). Implemented as `webrtc/` module (6 unit tests, Cloudflare mocked); frontend fetches it right after the socket connects, before any peer connection, and falls back to STUN. Verified in Chrome as a guest (`/webrtc/ice-servers` → 200). Keys stay server-side.
 - [x] Prisma/pg Pool: 15 s connect timeout, max 10, idle error handler (Neon drops idle connections). Owner verified `/health` → `db: up` against Neon (2026-10-07). Don't pass `channel_binding=require`.
 - [ ] Align `docker-compose.yml` Postgres major version with whatever Neon created
 - [x] CORS (REST + Socket.io) now reads `FRONTEND_ORIGIN` (comma-separated); unset = `*`. Verified allowed vs blocked origin. **Set it on Render once the Vercel URL exists.**
-- [ ] Render config (build/start commands or Dockerfile, `render.yaml`); production env (strong `JWT_SECRET`, Neon `DATABASE_URL`/`DIRECT_URL`)
+- [x] Backend LIVE on Render: https://beecollab-rwbj.onrender.com (owner deployed 2026-10-07). Verified from outside: `/health` db up (0.23 s warm), tables exist (read-only lookup → 404 not 500), `/api/docs` 200, **TURN creds returned by Cloudflare**, `wss://` Socket.io works (2 guests: join, state, chat, WebRTC offer relay; connect ~130 ms). No `render.yaml` (settings are in the dashboard).
 - [ ] Verify Neon cold-start behaviour with Prisma + `pg` Pool; verify Socket.io stays stable on Render free (long call, >15 min)
 - [ ] Deploy, smoke-test a 3-person call across different networks (incl. mobile data) to validate TURN
 - [ ] Rewrite README with real URLs
