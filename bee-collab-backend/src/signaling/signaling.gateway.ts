@@ -20,6 +20,7 @@ import { ReactionService } from '../meetings/reaction.service';
 import { WsJwtGuard } from '../auth/guards/ws-jwt.guard';
 import { SocketData, WsUser } from './signaling.types';
 import { ParticipantMediaChangedEvent } from '../events/meeting.events';
+import { getAllowedOrigins } from '../common/cors';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ interface RemoveCoHostPayload {
 
 @WebSocketGateway({
   namespace: '/meetings',
-  cors: { origin: '*' },
+  cors: { origin: getAllowedOrigins() },
 })
 export class SignalingGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
