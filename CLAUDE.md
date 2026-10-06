@@ -2,7 +2,7 @@
 
 College project: Google-Meet-style video meetings (WebRTC **full mesh**, no SFU). Being prepared for redeployment and to serve as the **system under test** for the owner's software-testing portfolio. Claude's job here: get it deployable and testable, then write a test spec that the owner hands to a separate "Claude Test" agent. See [PLAN.md](PLAN.md) for roadmap and status.
 
-**Hosting (backend live, frontend pending):** backend https://beecollab-rwbj.onrender.com (Render free). Plan: frontend on Vercel (Hobby), backend on Render free, DB on Neon free, TURN from Cloudflare. Free tiers sleep when idle, so the frontend wakes the backend on every page load via `GET /health` (no keep-alive pinging). Details in PLAN.md; owner's account steps in [SETUP.md](SETUP.md).
+**Hosting (both live):** frontend https://beecollab.vercel.app, backend https://beecollab-rwbj.onrender.com (Render free). Stack: frontend on Vercel (Hobby), backend on Render free, DB on Neon free, TURN from Cloudflare. Free tiers sleep when idle, so the frontend wakes the backend on every page load via `GET /health` (no keep-alive pinging). Details in PLAN.md; owner's account steps in [SETUP.md](SETUP.md).
 
 ## Layout
 Monorepo, no root package.json. Each app has its own `npm install`.

@@ -52,7 +52,7 @@ Hosting research (checked 2026-10-07; third-party sources, re-verify before sign
 | HTTPS/WSS | Provided by Render / Vercel (`*.onrender.com`, `*.vercel.app`) | No custom domain needed. Camera/mic need HTTPS and the HTTPS frontend needs WSS; both are satisfied by default. |
 
 - [x] Hosting decision: Option B (see Decisions)
-- [x] **Owner:** Neon, Cloudflare TURN and Render done (2026-10-07). Remaining: Vercel deploy, then set `FRONTEND_ORIGIN` on Render (CORS is still `*`).
+- [x] **Owner:** Neon, Cloudflare TURN and Render done (2026-10-07). Vercel deployed: https://beecollab.vercel.app (verified: pages 200, bundle points at the Render URL, wake-on-open `/health` call fires, home shows "System Online", no console errors). Remaining: set `FRONTEND_ORIGIN` on Render (CORS is still `*`).
 - [x] TURN (code done 2026-10-07; needs real Cloudflare creds on Render to be exercised): backend endpoint (e.g. `GET /webrtc/ice-servers`, JWT incl. guests) calls `POST https://rtc.live.cloudflare.com/v1/turn/keys/$CF_TURN_KEY_ID/credentials/generate-ice-servers` with `Authorization: Bearer $CF_TURN_API_TOKEN`, body `{"ttl": 86400}` (max 48 h), returns `iceServers` (201). Implemented as `webrtc/` module (6 unit tests, Cloudflare mocked); frontend fetches it right after the socket connects, before any peer connection, and falls back to STUN. Verified in Chrome as a guest (`/webrtc/ice-servers` → 200). Keys stay server-side.
 - [x] Prisma/pg Pool: 15 s connect timeout, max 10, idle error handler (Neon drops idle connections). Owner verified `/health` → `db: up` against Neon (2026-10-07). Don't pass `channel_binding=require`.
 - [ ] Align `docker-compose.yml` Postgres major version with whatever Neon created
