@@ -1,5 +1,7 @@
 # Setup yang dikerjakan owner
 
+> **STATUS (2026-10-07): SEMUA LANGKAH DI BAWAH SUDAH SELESAI** (Neon, Cloudflare TURN, Render, Vercel, `FRONTEND_ORIGIN`). File ini disimpan sebagai referensi, misalnya kalau harus deploy ulang dari nol. Hal yang masih bisa kamu kerjakan sekarang ada di [OWNER-TODO.md](OWNER-TODO.md).
+
 Diverifikasi ke dokumentasi resmi pada 2026-10-07 (Neon, Render, Cloudflare). Nama menu di dashboard bisa sedikit berbeda dari tulisan di sini; kalau ada yang tidak cocok, screenshot dan tanya Claude.
 
 ## Aturan keamanan (penting)
@@ -130,6 +132,13 @@ Alasan `--include=dev`: `nest build` butuh `@nestjs/cli` dan `typescript` yang a
 | `CF_TURN_KEY_ID` | Turn Token ID (langkah 2) |
 | `CF_TURN_API_TOKEN` | API Token (langkah 2) |
 | `FRONTEND_ORIGIN` | URL Vercel, contoh `https://beecollab.vercel.app` (tanpa garis miring di akhir; boleh beberapa, dipisah koma). Isi setelah frontend ada, lalu Render akan redeploy sendiri. Kalau kosong, backend menerima semua origin. |
+
+Variabel **opsional** (jangan diisi kecuali sedang menjalankan QA; lihat [OWNER-TODO.md](OWNER-TODO.md) bagian 1):
+
+| Key | Value |
+|---|---|
+| `TEST_SUPPORT_ENABLED` | `true` (menyalakan endpoint pembersih data QA; default mati) |
+| `TEST_ADMIN_TOKEN` | token acak ≥ 16 karakter |
 
 **Jangan** isi `PORT`: Render menyediakannya sendiri (default 10000) dan backend kita sudah membaca `PORT` dan mendengarkan di `0.0.0.0`, yang disyaratkan Render.
 
