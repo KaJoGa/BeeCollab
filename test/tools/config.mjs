@@ -26,11 +26,27 @@ export const uniqueEmail = (prefix) => `${prefix}-${Date.now()}-${Math.floor(Mat
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * fetch with a timeout. Uses AbortController + clearTimeout instead of AbortSignal.timeout():
+ * on Windows a pending AbortSignal.timeout timer at process exit can trip a libuv assertion
+ * and turn a green run into a non-zero exit code.
+ */
+export async function timedFetch(url, init = {}, ms = 90_000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * Minimal REST helper. Returns { status, body } where body is the parsed JSON
  * envelope ({success,data,message,...} or {success:false,error,statusCode,...}).
  */
 export async function api(method, path, { body, token, headers } = {}) {
-  const res = await fetch(API + path, {
+  // 90 s: a sleeping Render instance can take ~1 min to answer
+  const res = await timedFetch(API + path, {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -38,8 +54,7 @@ export async function api(method, path, { body, token, headers } = {}) {
       ...headers,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(90_000), // a sleeping Render instance can take ~1 min
-  });
+  }, 90_000);
   let json = {};
   try {
     json = await res.json();

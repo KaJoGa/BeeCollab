@@ -13,6 +13,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts', // no-op unless QA_CLEANUP=1 and TEST_ADMIN_TOKEN are set
   use: {
     baseURL: WEB,
     trace: 'retain-on-failure',

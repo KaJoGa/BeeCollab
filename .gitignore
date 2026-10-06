@@ -3,6 +3,9 @@ test/node_modules/
 test/test-results/
 test/playwright-report/
 test/.auth/
+# throw-away probe scripts (never committed)
+test/tools/_*.mjs
+test/e2e/_*.spec.ts
 
 # misc
 .dist/

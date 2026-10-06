@@ -14,4 +14,5 @@ for (const { key, name } of ACCOUNTS) {
   }
 }
 console.log(`\nPassword for all accounts: ${PASSWORD === 'QaPassw0rd!' ? 'QaPassw0rd! (default; override with QA_PASSWORD)' : '(from QA_PASSWORD)'}`);
-process.exit(failed ? 1 : 0);
+// exitCode (not process.exit) so open keep-alive sockets can close first — see cleanup.mjs
+process.exitCode = failed ? 1 : 0;
