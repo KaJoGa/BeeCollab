@@ -27,6 +27,29 @@ const getWsBase = () => {
   return apiBase;
 };
 
+// Used until (or if) the backend's TURN-enabled list can't be fetched.
+const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+];
+
+// STUN + short-lived TURN credentials from the backend (Cloudflare TURN keys stay server-side).
+async function fetchIceServers(token: string): Promise<RTCIceServer[]> {
+  try {
+    const res = await fetch(`${getApiBase()}/webrtc/ice-servers`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return DEFAULT_ICE_SERVERS;
+    const data = unwrap(await res.json());
+    return Array.isArray(data?.iceServers) && data.iceServers.length > 0
+      ? data.iceServers
+      : DEFAULT_ICE_SERVERS;
+  } catch {
+    return DEFAULT_ICE_SERVERS;
+  }
+}
+
 // Format a kbps value as kbps or Mbps
 const fmtRate = (kbps: number) =>
   kbps >= 1000 ? `${(kbps / 1000).toFixed(1)} Mbps` : `${Math.round(kbps)} kbps`;
@@ -117,6 +140,7 @@ export default function Meeting() {
   const localStreamRef = useRef<MediaStream | null>(null);
   const mediaEnabledRef = useRef(mediaEnabled);
   const pendingMediaSyncRef = useRef(false);
+  const iceServersRef = useRef<RTCIceServer[]>(DEFAULT_ICE_SERVERS);
   const screenStreamRef = useRef<MediaStream | null>(null);
   // Always points to the latest toggleMedia — avoids stale closure in WS listeners
   const toggleMediaRef = useRef<(type: 'audio' | 'video') => Promise<void>>(() => Promise.resolve());
@@ -681,10 +705,7 @@ export default function Meeting() {
     if (existing) return existing;
 
     const pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-      ],
+      iceServers: iceServersRef.current,
     });
 
     const state: PeerState = {
@@ -1046,8 +1067,11 @@ export default function Meeting() {
       transports: ['websocket'],
     });
 
-    newSocket.on('connect', () => {
+    newSocket.on('connect', async () => {
       setIsConnected(true);
+      // Fetch ICE servers now that the backend is known to be awake and before any
+      // peer connection is created (peers are created after meeting:join).
+      iceServersRef.current = await fetchIceServers(token);
       const initialMedia = mediaEnabledRef.current;
       // Send initial media state (sync with current local state)
       newSocket.emit('meeting:join', {

@@ -13,6 +13,7 @@ import { MeetingsModule } from './meetings/meetings.module';
 import { ChatModule } from './chat/chat.module';
 import { SignalingModule } from './signaling/signaling.module';
 import { EventsModule } from './events/events.module';
+import { WebrtcModule } from './webrtc/webrtc.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EventsModule } from './events/events.module';
     ChatModule,
     SignalingModule,
     EventsModule,
+    WebrtcModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
