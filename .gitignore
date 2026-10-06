@@ -1,0 +1,9 @@
+# test workspace
+test/node_modules/
+test/test-results/
+test/playwright-report/
+test/.auth/
+
+# misc
+.dist/
+*.log
