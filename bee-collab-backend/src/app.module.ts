@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthController } from './health/health.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { RepositoryModule } from './repositories/repository.module';
 import { AuthModule } from './auth/auth.module';
@@ -29,7 +30,7 @@ import { EventsModule } from './events/events.module';
     SignalingModule,
     EventsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule { }

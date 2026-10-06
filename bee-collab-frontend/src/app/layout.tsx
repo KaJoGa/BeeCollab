@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import WakeServer from "./WakeServer";
 
 export const metadata: Metadata = {
   title: "BeeCollab | Seamless Collaboration",
@@ -17,6 +18,7 @@ export default function RootLayout({
           (e.g. bis_register, __processed_*) onto <body> before React hydrates,
           which would otherwise log a harmless hydration mismatch warning. */}
       <body suppressHydrationWarning>
+        <WakeServer />
         {children}
       </body>
     </html>
