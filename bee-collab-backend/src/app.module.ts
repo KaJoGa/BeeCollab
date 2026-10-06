@@ -14,6 +14,7 @@ import { ChatModule } from './chat/chat.module';
 import { SignalingModule } from './signaling/signaling.module';
 import { EventsModule } from './events/events.module';
 import { WebrtcModule } from './webrtc/webrtc.module';
+import { TestSupportModule } from './test-support/test-support.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { WebrtcModule } from './webrtc/webrtc.module';
     SignalingModule,
     EventsModule,
     WebrtcModule,
+    TestSupportModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
