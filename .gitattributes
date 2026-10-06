@@ -1,0 +1,2 @@
+# Prisma checksums migration files; keep them byte-identical across Windows/Linux checkouts.
+*.sql text eol=lf
