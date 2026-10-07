@@ -1,6 +1,10 @@
 # QA workspace: kept locally for the QA agent, never committed or pushed
 test/
 
+# QA hand-off documents (for the Claude QA agent only)
+BEECOLLAB_TESTING_SURFACE.md
+CLAUDE_QA_PROMPT.md
+
 # misc
 .dist/
 *.log
