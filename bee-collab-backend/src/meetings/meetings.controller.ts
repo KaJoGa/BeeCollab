@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Post,
@@ -21,7 +22,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 
 interface AuthRequest extends Request {
-  user: { id: string };
+  user: { id: string; isGuest?: boolean };
+}
+
+/** Guests have a JWT but no User row, so DB-backed actions would fail with a 500 — refuse them clearly instead. */
+function assertNotGuest(req: AuthRequest, action: string) {
+  if (req.user.isGuest) {
+    throw new ForbiddenException(`Guests cannot ${action}. Please sign in.`);
+  }
 }
 
 @ApiTags('Meetings')
@@ -37,7 +45,9 @@ export class MeetingsController {
   @ApiResponse({ status: 201, description: 'Meeting created. Returns full meeting object including roomCode.' })
   @ApiResponse({ status: 400, description: 'Validation error.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Guests cannot create meetings.' })
   create(@Req() req: AuthRequest, @Body() dto: CreateMeetingDto) {
+    assertNotGuest(req, 'create meetings');
     return this.meetingsService.createMeeting(req.user.id, dto);
   }
 
@@ -76,13 +86,14 @@ export class MeetingsController {
   @ApiParam({ name: 'meetingId', description: 'UUID of the meeting to join' })
   @ApiResponse({ status: 201, description: 'Joined successfully. Returns meeting + participant record.' })
   @ApiResponse({ status: 400, description: 'Meeting has ended or is full.' })
-  @ApiResponse({ status: 403, description: 'Invalid room code.' })
+  @ApiResponse({ status: 403, description: 'Invalid room code, or the caller is a guest (guests join over WebSocket only).' })
   @ApiResponse({ status: 404, description: 'Meeting not found.' })
   join(
     @Req() req: AuthRequest,
     @Param('meetingId') meetingId: string,
     @Body() dto: JoinMeetingDto,
   ) {
+    assertNotGuest(req, 'join through this endpoint');
     return this.meetingsService.joinMeeting(req.user.id, meetingId, dto);
   }
 
