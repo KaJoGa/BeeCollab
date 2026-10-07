@@ -1,4 +1,4 @@
-import { cleanEnvValue, readTestSupportConfig } from './test-support.config';
+import { cleanEnvValue, readTestSupportConfig, relatedEnvNames } from './test-support.config';
 
 const TOKEN = 'a-sufficiently-long-token';
 
@@ -55,6 +55,26 @@ describe('readTestSupportConfig', () => {
       const c = readTestSupportConfig({ TEST_SUPPORT_ENABLED: flag, TEST_ADMIN_TOKEN: secret });
       if (!c.enabled) expect(c.reason).not.toContain(secret);
     }
+  });
+});
+
+describe('relatedEnvNames', () => {
+  it('lists only names, sorted, and exposes a trailing space or a different case in the spelling', () => {
+    const env = {
+      'TEST_SUPPORT_ENABLED ': 'true',
+      test_admin_token: 'super-secret-value-123456',
+      DATABASE_URL: 'postgres://u:p@h/db',
+      JWT_SECRET: 'x',
+      PORT: '3000',
+    };
+    const names = relatedEnvNames(env);
+    expect(names).toEqual(['TEST_SUPPORT_ENABLED ', 'test_admin_token']);
+    expect(JSON.stringify(names)).toContain('"TEST_SUPPORT_ENABLED "'); // the space is visible
+    expect(JSON.stringify(names)).not.toContain('super-secret-value'); // values never appear
+  });
+
+  it('returns an empty list when nothing related is present', () => {
+    expect(relatedEnvNames({ PORT: '3000', DATABASE_URL: 'x' })).toEqual([]);
   });
 });
 

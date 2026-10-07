@@ -13,6 +13,17 @@ export function cleanEnvValue(value: string | undefined): string {
 }
 
 /**
+ * NAMES (never values) of environment variables that look related to this feature.
+ * Printed as JSON so a trailing space or a different letter case in a name is visible
+ * when TEST_SUPPORT_ENABLED "is not set" although the owner believes it is.
+ */
+export function relatedEnvNames(env: NodeJS.ProcessEnv = process.env): string[] {
+  return Object.keys(env)
+    .filter((name) => /test|support|admin|qa/i.test(name))
+    .sort();
+}
+
+/**
  * Single source of truth for whether the QA endpoints are on, used by the guard,
  * the startup log and /health. When disabled it says WHY (never printing the token).
  */

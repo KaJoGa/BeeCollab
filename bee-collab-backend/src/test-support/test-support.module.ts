@@ -1,5 +1,5 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
-import { readTestSupportConfig } from './test-support.config';
+import { readTestSupportConfig, relatedEnvNames } from './test-support.config';
 import { TestSupportController } from './test-support.controller';
 import { TestSupportGuard } from './test-support.guard';
 import { TestSupportService } from './test-support.service';
@@ -20,6 +20,15 @@ export class TestSupportModule implements OnModuleInit {
       );
     } else {
       this.logger.log(`QA endpoints disabled: ${config.reason}`);
+      // Only worth saying when the flag itself is missing: shows what *did* arrive.
+      if (config.reason === 'TEST_SUPPORT_ENABLED is not set') {
+        const names = relatedEnvNames();
+        this.logger.log(
+          names.length > 0
+            ? `Environment variable names that look related (exact spelling, JSON-quoted): ${JSON.stringify(names)}`
+            : 'No environment variable with TEST, SUPPORT, ADMIN or QA in its name reached this process: it was set on another service, or saved without redeploying this one.',
+        );
+      }
     }
   }
 }
