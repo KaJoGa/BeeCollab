@@ -50,6 +50,12 @@ describe('TestSupportGuard', () => {
     expect(guard.canActivate(ctx({ 'x-test-token': TOKEN }))).toBe(true);
   });
 
+  it('accepts a padded/quoted environment configuration and a header with stray whitespace', () => {
+    process.env.TEST_SUPPORT_ENABLED = ' "TRUE" ';
+    process.env.TEST_ADMIN_TOKEN = `"${TOKEN}" `;
+    expect(guard.canActivate(ctx({ 'x-test-token': `  ${TOKEN}  ` }))).toBe(true);
+  });
+
   it('treats any value other than "true" as disabled', () => {
     process.env.TEST_SUPPORT_ENABLED = '1';
     process.env.TEST_ADMIN_TOKEN = TOKEN;

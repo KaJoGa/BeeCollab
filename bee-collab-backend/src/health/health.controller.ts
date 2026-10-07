@@ -1,6 +1,7 @@
 import { Controller, Get, Logger } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '../prisma/prisma.service';
+import { readTestSupportConfig } from '../test-support/test-support.config';
 
 const DB_TIMEOUT_MS = 8000;
 
@@ -19,7 +20,7 @@ export class HealthController {
       `(waits up to ${DB_TIMEOUT_MS / 1000}s, which also wakes a sleeping Neon database), otherwise "down". ` +
       'The frontend calls this on every page load to wake the free-tier backend.',
   })
-  @ApiResponse({ status: 200, description: '`{ status, db: "up" | "down", commit, uptimeSeconds }` inside the ApiResponse envelope.' })
+  @ApiResponse({ status: 200, description: '`{ status, db: "up" | "down", commit, uptimeSeconds, testSupport: "enabled" | "disabled" }` inside the ApiResponse envelope.' })
   async check() {
     return {
       status: 'ok',
@@ -27,6 +28,8 @@ export class HealthController {
       // Render injects RENDER_GIT_COMMIT; lets tests confirm which build is live.
       commit: (process.env.RENDER_GIT_COMMIT ?? 'dev').slice(0, 7),
       uptimeSeconds: Math.round(process.uptime()),
+      // Whether the hidden QA endpoints are on; the reason when off is in the startup log.
+      testSupport: readTestSupportConfig().enabled ? 'enabled' : 'disabled',
     };
   }
 
