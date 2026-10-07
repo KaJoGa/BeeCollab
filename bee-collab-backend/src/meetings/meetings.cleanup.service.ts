@@ -49,7 +49,7 @@ export class MeetingsCleanupService {
         // Notify WebSocket clients the meeting has expired
         this.signalingGateway.emitMeetingEnded(
           meeting.id,
-          'Pertemuan berakhir karena durasi habis.',
+          'The meeting time has ended (duration limit reached).',
         );
 
         await this.participantRepository.deleteMany(meeting.id);

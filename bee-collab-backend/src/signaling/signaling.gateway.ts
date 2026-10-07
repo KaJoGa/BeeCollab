@@ -179,7 +179,7 @@ export class SignalingGateway
     const existingSockets = await this.server.in(payload.meetingId).fetchSockets();
     for (const socket of existingSockets) {
       if ((socket.data as SocketData).user?.sub === user.sub && socket.id !== client.id) {
-        socket.emit('error', { message: 'Membuka dari tab lain. Koneksi ini ditutup.' });
+        socket.emit('error', { message: 'Opened in another tab. This connection was closed.' });
         socket.disconnect();
       }
     }
