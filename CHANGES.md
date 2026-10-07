@@ -48,6 +48,12 @@ The UI used to mix Indonesian and English. All user-facing text now comes from o
 * Known backend errors are mapped to Indonesian client-side via `ta()` (login/register/guest errors); unknown ones pass through in English.
 * Verified: `tsc --noEmit`, `next build`, backend `nest build`. Runtime behaviour **not yet tested** — manual check by the owner.
 
+### Owner-approved fixes (2026-10-07)
+* **Guest on `POST /meetings` and `POST /meetings/:id/join` → 403** (`Guests cannot … Please sign in.`) instead of a 500 from the foreign-key failure (`meetings.controller.ts`, `assertNotGuest`). Other endpoints and the WebSocket path are unchanged.
+* **Chat time** now uses the message's server `createdAt` (new test id `chat-message-time`) instead of the render time; shown in the viewer's locale/timezone, empty if `createdAt` is missing.
+* **Decided to leave as is:** WebSocket join without the room code (matches Zoom/Meet-style "guess a code and get in"; the project is about architecture/API testing, not hardening). Chat is stored for registered users only and deleted with the meeting; guest messages are broadcast but never stored (intended, free-tier quota).
+* Verified: backend `nest build`, frontend `tsc --noEmit`. Not run live yet — `smoke-api` has two new guest-403 checks (47 total).
+
 ## 5. Verification matrix (end of run)
 | Check | Local | Live (Vercel + Render + Neon + Cloudflare TURN) |
 |---|---|---|
