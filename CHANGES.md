@@ -39,6 +39,15 @@ Everything the project gained since the original VPS deployment was lost. Groupe
 * Result (production dependencies): backend 20 → 6, frontend 9 → 0. The 6 left are the Prisma CLI chain (build-time only; its "fix" would downgrade Prisma) — accepted, see `test/07` R-42.
 * Verified locally after the update: `tsc` + `next build`, backend build + Jest (24 pass, same 6 legacy suites fail), `smoke-api` 45/45, `smoke-ws` 41/41, Playwright 64/64 (exit code 0).
 
+### UI language: unified English + English/Indonesian switch (2026-10-07)
+The UI used to mix Indonesian and English. All user-facing text now comes from one dictionary (`src/lib/i18n/`, no library): `messages.en.ts` (164 keys, text identical to the previous English UI so existing tests still match), `messages.id.ts` (compile-time complete), `index.tsx` (`LanguageProvider`, `useI18n()` → `t`, `ta`, `lang`, `setLang`).
+* Default **English**; choice stored in `localStorage.lang`; `<html lang>` follows it. First paint is English, the saved language is applied after mount.
+* Switch: `LanguageSwitch` (EN | ID) on home and login; `<select>` in the meeting **Device Settings** dialog.
+* New test ids: `lang-switch`, `lang-en`, `lang-id`, `lang-select` (documented in `test/08`).
+* Backend: two Indonesian messages made English — expiry reason (`meetings.cleanup.service.ts`: "The meeting time has ended (duration limit reached).") and duplicate tab (`signaling.gateway.ts`: "Opened in another tab. …"). **Needs a Render redeploy.** Frontend expiry detection now also matches "duration".
+* Known backend errors are mapped to Indonesian client-side via `ta()` (login/register/guest errors); unknown ones pass through in English.
+* Verified: `tsc --noEmit`, `next build`, backend `nest build`. Runtime behaviour **not yet tested** — manual check by the owner.
+
 ## 5. Verification matrix (end of run)
 | Check | Local | Live (Vercel + Render + Neon + Cloudflare TURN) |
 |---|---|---|
