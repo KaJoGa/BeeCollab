@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
+import { LANGS, useI18n, type Lang } from '@/lib/i18n';
 import {
   Mic, MicOff, Video, VideoOff, PhoneOff, Hand, Users, MessageSquare,
   Send, X, Subtitles, MonitorUp, MoreVertical, Info, ListChecks, BarChart3, Smile,
@@ -78,6 +79,10 @@ function ConnectionBars({ bars }: { bars: number }) {
 }
 
 export default function Meeting() {
+  const { t, lang, setLang } = useI18n();
+  // Socket handlers are created once per connection; this ref lets them use the CURRENT language.
+  const tRef = useRef(t);
+  tRef.current = t;
   const router = useRouter();
   const params = useParams();
   const meetingId = params.id as string;
@@ -986,12 +991,12 @@ export default function Meeting() {
 
     const isAnyoneElseSharingScreen = Object.values(remoteStreams).some(streams => streams.length > 1);
     if (isAnyoneElseSharingScreen) {
-      alert('Someone else is presenting. You cannot share screen at this time.');
+      alert(t('sharingBlocked'));
       return;
     }
 
     if (!navigator.mediaDevices?.getDisplayMedia) {
-      alert('Browser does not support screen sharing.');
+      alert(t('noScreenShare'));
       return;
     }
 
@@ -1226,7 +1231,7 @@ export default function Meeting() {
     newSocket.on('meeting:ended', (data) => {
       const reason = data?.reason || 'The meeting has been ended by the host.';
       setMeetingEndedReason(reason);
-      if (reason.toLowerCase().includes('durasi') || reason.toLowerCase().includes('habis') || reason.toLowerCase().includes('time')) {
+      if (reason.toLowerCase().includes('durasi') || reason.toLowerCase().includes('habis') || reason.toLowerCase().includes('time') || reason.toLowerCase().includes('duration')) {
         setMeetingEndType('expired');
       } else {
         setMeetingEndType('ended');
@@ -1254,7 +1259,7 @@ export default function Meeting() {
     });
 
     newSocket.on('media:ask-unmute', () => {
-      const agree = window.confirm('The host is asking you to unmute. Unmute now?');
+      const agree = window.confirm(tRef.current('confirmUnmute'));
       if (agree && !mediaEnabledRef.current.audio) {
         // Use ref so we always call the latest toggleMedia, not the stale closure
         toggleMediaRef.current('audio');
@@ -1528,7 +1533,7 @@ export default function Meeting() {
 
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        alert('Browser does not support camera/mic access, or the page is not served over HTTPS.');
+        alert(t('noMediaApi'));
         return;
       }
 
@@ -1593,7 +1598,7 @@ export default function Meeting() {
       }
     } catch (err) {
       console.error('Error accessing media devices.', err);
-      alert('Failed to access camera/mic.');
+      alert(t('mediaFailed'));
     }
   };
 
@@ -1626,8 +1631,8 @@ export default function Meeting() {
   if (!meetingId) {
     return (
       <main style={{ padding: '2rem', textAlign: 'center' }}>
-        <h2>No Meeting ID provided.</h2>
-        <button onClick={() => router.push('/')}>Back to Home</button>
+        <h2>{t('noMeetingId')}</h2>
+        <button onClick={() => router.push('/')}>{t('backToHome')}</button>
       </main>
     );
   }
@@ -1635,7 +1640,7 @@ export default function Meeting() {
   const handleCopyId = () => {
     if (meetingId) {
       navigator.clipboard.writeText(meetingId);
-      alert('Meeting ID copied to clipboard!');
+      alert(t('copiedId'));
     }
   };
 
@@ -1672,8 +1677,8 @@ export default function Meeting() {
   }, {});
 
   const displayParticipants = [
-    { isLocal: true, name: 'You', id: 'local' },
-    ...remoteParticipants.map(p => ({ isLocal: false, name: p.user?.name || `User ${p.socketId?.substring(0, 5)}`, id: p.socketId }))
+    { isLocal: true, name: t('you'), id: 'local' },
+    ...remoteParticipants.map(p => ({ isLocal: false, name: p.user?.name || t('userN', { id: p.socketId?.substring(0, 5) ?? '' }), id: p.socketId }))
   ];
 
   type DisplayItem = {
@@ -1690,7 +1695,7 @@ export default function Meeting() {
   const displayItems: DisplayItem[] = [];
 
   // Add local camera
-  displayItems.push({ isLocal: true, name: 'You', id: 'local', type: 'camera' });
+  displayItems.push({ isLocal: true, name: t('you'), id: 'local', type: 'camera' });
   // Add local screen share if active
   if (isScreenSharing) {
     displayItems.push({ isLocal: true, name: 'You (Presenting)', id: 'local-screen', type: 'screen' });
@@ -1698,7 +1703,7 @@ export default function Meeting() {
 
   remoteParticipants.forEach(p => {
     const streams = remoteStreams[p.socketId] || [];
-    const resolvedName = meetingInfo?.participantUsers?.[p.userId]?.name || p.user?.name || `User ${p.socketId?.substring(0, 5)}`;
+    const resolvedName = meetingInfo?.participantUsers?.[p.userId]?.name || p.user?.name || t('userN', { id: p.socketId?.substring(0, 5) ?? '' });
     displayItems.push({
       isLocal: false,
       name: resolvedName,
@@ -1795,8 +1800,8 @@ export default function Meeting() {
           }}></div>
 
           <div style={{ textAlign: 'center' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#202124', margin: '0 0 0.5rem 0' }}>Joining meeting...</h2>
-            <p style={{ fontSize: '0.875rem', color: '#5f6368', margin: 0 }}>Please wait a moment...</p>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#202124', margin: '0 0 0.5rem 0' }}>{t('joiningMeetingTitle')}</h2>
+            <p style={{ fontSize: '0.875rem', color: '#5f6368', margin: 0 }}>{t('pleaseWait')}</p>
           </div>
 
           <div style={{ position: 'absolute', bottom: '3rem', display: 'flex', gap: '0.5rem' }}>
@@ -1826,9 +1831,9 @@ export default function Meeting() {
             maxWidth: '420px',
             width: '90%'
           }}>
-            <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>Enable audio/video</h3>
+            <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>{t('enableAV')}</h3>
             <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: '#d1d5db' }}>
-              Click once to allow playback.
+              {t('clickAllow')}
             </p>
             <button
               data-testid="enable-media-btn"
@@ -1843,7 +1848,7 @@ export default function Meeting() {
                 fontWeight: 600
               }}
             >
-              Enable now
+              {t('enableNow')}
             </button>
           </div>
         </div>
@@ -1884,7 +1889,7 @@ export default function Meeting() {
                   </text>
                 </svg>
               </div>
-              <span style={{ fontSize: '14px', color: '#5f6368' }}>Returning to home screen</span>
+              <span style={{ fontSize: '14px', color: '#5f6368' }}>{t('returningHome')}</span>
             </div>
           )}
 
@@ -1907,10 +1912,10 @@ export default function Meeting() {
               maxWidth: '640px',
               margin: '0 auto 4rem'
             }}>
-              {meetingEndType === 'kicked' ? "You have been removed from the meeting" :
-                meetingEndType === 'expired' ? "The meeting time has ended" :
-                  meetingEndType === 'full' ? "This meeting is full" :
-                    "Host has ended the meeting for everyone"}
+              {meetingEndType === 'kicked' ? t('endKicked') :
+                meetingEndType === 'expired' ? t('endExpired') :
+                  meetingEndType === 'full' ? t('endFull') :
+                    t('endEnded')}
             </h1>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
@@ -1938,7 +1943,7 @@ export default function Meeting() {
                   e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)';
                 }}
               >
-                Return to home screen
+                {t('returnHome')}
               </button>
 
               {meetingEndType === 'kicked' && (
@@ -1949,7 +1954,7 @@ export default function Meeting() {
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
-                  Rejoin
+                  {t('rejoin')}
                 </button>
               )}
             </div>
@@ -1960,18 +1965,18 @@ export default function Meeting() {
         <div data-testid="info-modal" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: '1.5rem', borderRadius: '14px', width: '90%', maxWidth: '360px', boxShadow: '0 12px 30px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>Meeting Info</h3>
-              <button data-testid="info-close" onClick={() => setIsInfoOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label="Close info">
+              <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>{t('meetingInfo')}</h3>
+              <button data-testid="info-close" onClick={() => setIsInfoOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label={t('closeInfo')}>
                 <X size={18} />
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', color: '#3c4043' }}>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>Meeting name</div>
+                <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{t('meetingNameField')}</div>
                 <div data-testid="info-meeting-title" style={{ fontWeight: 600 }}>{meetingInfo?.title || 'Meeting'}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>Meeting code</div>
+                <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{t('meetingCodeField')}</div>
                 <div data-testid="info-room-code" style={{ fontWeight: 600, fontFamily: 'monospace' }}>{meetingInfo?.roomCode || meetingId}</div>
               </div>
             </div>
@@ -1982,40 +1987,55 @@ export default function Meeting() {
         <div data-testid="device-settings-modal" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 46, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: '1.5rem', borderRadius: '14px', width: '92%', maxWidth: '420px', boxShadow: '0 12px 30px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>Device Settings</h3>
-              <button data-testid="device-close" onClick={() => setIsDeviceSettingsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label="Close device settings">
+              <h3 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>{t('deviceSettings')}</h3>
+              <button data-testid="device-close" onClick={() => setIsDeviceSettingsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368' }} aria-label={t('closeDeviceSettings')}>
                 <X size={18} />
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#3c4043' }}>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Microphone</span>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>{t('microphone')}</span>
                 <select
                   data-testid="device-audio-select"
                   value={selectedAudioDeviceId}
                   onChange={(e) => setSelectedAudioDeviceId(e.target.value)}
                   style={{ padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid #dadce0', fontSize: '0.9rem' }}
                 >
-                  {audioDevices.length === 0 && <option value="">No microphone detected</option>}
+                  {audioDevices.length === 0 && <option value="">{t('noMic')}</option>}
                   {audioDevices.map((device, index) => (
                     <option key={device.deviceId} value={device.deviceId}>
-                      {device.label || `Microphone ${index + 1}`}
+                      {device.label || t('micN', { n: index + 1 })}
                     </option>
                   ))}
                 </select>
               </label>
               <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#3c4043' }}>
-                <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>Camera</span>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>{t('camera')}</span>
                 <select
                   data-testid="device-video-select"
                   value={selectedVideoDeviceId}
                   onChange={(e) => setSelectedVideoDeviceId(e.target.value)}
                   style={{ padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid #dadce0', fontSize: '0.9rem' }}
                 >
-                  {videoDevices.length === 0 && <option value="">No camera detected</option>}
+                  {videoDevices.length === 0 && <option value="">{t('noCam')}</option>}
                   {videoDevices.map((device, index) => (
                     <option key={device.deviceId} value={device.deviceId}>
-                      {device.label || `Camera ${index + 1}`}
+                      {device.label || t('camN', { n: index + 1 })}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#3c4043' }}>
+                <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>{t('language')}</span>
+                <select
+                  data-testid="lang-select"
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as Lang)}
+                  style={{ padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid #dadce0', fontSize: '0.9rem' }}
+                >
+                  {LANGS.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.label}
                     </option>
                   ))}
                 </select>
@@ -2026,7 +2046,7 @@ export default function Meeting() {
                   onClick={() => setIsDeviceSettingsOpen(false)}
                   style={{ background: '#e5e7eb', border: 'none', color: '#111827', borderRadius: '10px', padding: '0.6rem 1rem', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   data-testid="device-apply"
@@ -2036,7 +2056,7 @@ export default function Meeting() {
                   }}
                   style={{ background: '#1a73e8', border: 'none', color: 'white', borderRadius: '10px', padding: '0.6rem 1rem', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  Apply
+                  {t('apply')}
                 </button>
               </div>
             </div>
@@ -2060,7 +2080,7 @@ export default function Meeting() {
         <button
           data-testid="mobile-info-btn"
           onClick={() => setIsInfoOpen(true)}
-          aria-label="Meeting info"
+          aria-label={t('meetingInfoAria')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -2087,8 +2107,8 @@ export default function Meeting() {
             {meetingInfo?.title || 'Meeting'}
           </span>
           <span
-            aria-label={isConnected ? 'Connected' : 'Connecting'}
-            title={isConnected ? 'Connected' : 'Connecting...'}
+            aria-label={isConnected ? t('connected') : t('connecting')}
+            title={isConnected ? t('connected') : t('connectingDots')}
             style={{
               flexShrink: 0,
               display: 'inline-block',
@@ -2105,7 +2125,7 @@ export default function Meeting() {
           <button
             data-testid="mobile-leave-btn"
             onClick={() => setIsLeaveMenuOpen((prev) => !prev)}
-            aria-label="Leave meeting"
+            aria-label={t('leaveMeetingAria')}
             style={{
               background: colors.red,
               border: 'none',
@@ -2142,14 +2162,14 @@ export default function Meeting() {
                   if (socket) socket.emit('meeting:end', { meetingId });
                   setIsLeaveMenuOpen(false);
                 }} data-testid="mobile-end-meeting" style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>
-                  End Meeting
+                  {t('endMeeting')}
                 </button>
               )}
               <button onClick={() => {
                 setIsLeaveMenuOpen(false);
                 router.push('/');
               }} data-testid="mobile-leave-meeting" style={{ background: '#374151', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>
-                Leave Meeting
+                {t('leaveMeeting')}
               </button>
             </div>
           )}
@@ -2364,10 +2384,10 @@ export default function Meeting() {
           <div className={`sidebar-container sidebar-${activeTab}`} data-testid="sidebar" data-tab={activeTab} style={{ width: '360px', background: 'linear-gradient(180deg, #f7f8fb 0%, #eef1f6 100%)', color: '#2b2f38', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(0,0,0,0.06)', flexShrink: 0, zIndex: 10, boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)', borderTopLeftRadius: '24px', borderBottomLeftRadius: '24px', overflow: 'hidden' }}>
             <div style={{ display: 'flex', padding: '1.1rem 1.25rem', alignItems: 'center', justifyContent: 'space-between', background: '#ffffff', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
               <span data-testid="sidebar-title" style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f3b64' }}>
-                {activeTab === 'people' ? `Participants (${participants.length})` :
-                 activeTab === 'chat' ? 'Chat' :
-                 activeTab === 'agenda' ? 'Meeting Agenda' :
-                 activeTab === 'polls' ? 'Polls' : ''}
+                {activeTab === 'people' ? t('participantsTitle', { n: participants.length }) :
+                 activeTab === 'chat' ? t('chatTitle') :
+                 activeTab === 'agenda' ? t('agendaTitle') :
+                 activeTab === 'polls' ? t('pollsTitle') : ''}
               </span>
               <button data-testid="sidebar-close" onClick={() => setActiveTab(null)} style={{ background: '#eef2f7', border: 'none', cursor: 'pointer', color: '#6b7280', width: '36px', height: '36px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={24} />
@@ -2410,11 +2430,11 @@ export default function Meeting() {
                             {isMe ? (
                               <>
                                 <span style={{ fontSize: '0.75rem', color: '#8f95a3' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                <strong style={{ fontSize: '0.875rem', color: '#4a4d55' }}>You</strong>
+                                <strong style={{ fontSize: '0.875rem', color: '#4a4d55' }}>{t('you')}</strong>
                               </>
                             ) : (
                               <>
-                                <strong style={{ fontSize: '0.875rem', color: '#4a4d55' }}>{m.sender?.name || `User ${m.senderId?.substring(0, 5)}`}</strong>
+                                <strong style={{ fontSize: '0.875rem', color: '#4a4d55' }}>{m.sender?.name || t('userN', { id: m.senderId?.substring(0, 5) ?? '' })}</strong>
                                 <span style={{ fontSize: '0.75rem', color: '#8f95a3' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </>
                             )}
@@ -2434,7 +2454,7 @@ export default function Meeting() {
                       type="text"
                       value={chatInput}
                       onChange={e => setChatInput(e.target.value)}
-                      placeholder="Type a message..."
+                      placeholder={t('typeMessage')}
                       style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#111827', fontSize: '0.9rem' }}
                     />
                     <button data-testid="chat-send" type="submit" disabled={!chatInput.trim()} style={{ background: chatInput.trim() ? '#1f3b64' : '#e5e7eb', border: 'none', cursor: chatInput.trim() ? 'pointer' : 'default', color: chatInput.trim() ? 'white' : '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', borderRadius: '12px' }}>
@@ -2442,7 +2462,7 @@ export default function Meeting() {
                     </button>
                   </div>
                   <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.65rem', color: '#8f95a3' }}>
-                    Messages can only be seen by participants in this call
+                    {t('chatFootnote')}
                   </div>
                 </form>
               </>
@@ -2454,13 +2474,13 @@ export default function Meeting() {
               <div style={{ padding: '1.25rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {(isHost || isCoHost) && agendas.length === 0 && (
                   <div style={{ background: '#ffffff', padding: '1rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600 }}>Create Agenda</h3>
+                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600 }}>{t('createAgenda')}</h3>
                     {newAgendaItems.map((item, i) => (
                       <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                         <input
                           data-testid="agenda-title-input"
                           type="text"
-                          placeholder="Title"
+                          placeholder={t('titlePlaceholder')}
                           value={item.title}
                           onChange={(e) => {
                             const updated = [...newAgendaItems];
@@ -2472,7 +2492,7 @@ export default function Meeting() {
                         <input
                           data-testid="agenda-duration-input"
                           type="number"
-                          placeholder="Sec"
+                          placeholder={t('secPlaceholder')}
                           value={item.duration}
                           onChange={(e) => {
                             const updated = [...newAgendaItems];
@@ -2488,7 +2508,7 @@ export default function Meeting() {
                       onClick={() => setNewAgendaItems([...newAgendaItems, { title: '', duration: 60 }])}
                       style={{ width: '100%', padding: '0.5rem', border: '1px dashed #3b82f6', color: '#3b82f6', background: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1rem' }}
                     >
-                      + Add Item
+                      {t('addItem')}
                     </button>
                     <button
                       data-testid="agenda-save"
@@ -2500,14 +2520,14 @@ export default function Meeting() {
                       }}
                       style={{ width: '100%', padding: '0.75rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}
                     >
-                      Save Agenda
+                      {t('saveAgenda')}
                     </button>
                   </div>
                 )}
 
                 {activeAgenda && (
                   <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Current Item</h3>
+                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('currentItem')}</h3>
                     <div data-testid="agenda-current" style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1f3b64', marginBottom: '1rem' }}>{activeAgenda.title}</div>
                     <div style={{ height: '8px', background: '#eef2f7', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ height: '100%', background: '#3b82f6', width: '45%', transition: 'width 1s linear' }}></div>
@@ -2516,16 +2536,16 @@ export default function Meeting() {
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Schedule</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{t('schedule')}</h3>
                   {agendas.length === 0 ? (
-                    <p style={{ color: '#8f95a3', fontSize: '0.875rem' }}>No agenda items set for this meeting.</p>
+                    <p style={{ color: '#8f95a3', fontSize: '0.875rem' }}>{t('noAgenda')}</p>
                   ) : (
                     agendas.map((item, i) => (
                       <div key={i} data-testid="agenda-item" data-active={item.isActive ? 'true' : 'false'} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', background: item.isActive ? '#eff6ff' : 'white', borderRadius: '12px', border: item.isActive ? '1px solid #bfdbfe' : '1px solid rgba(0,0,0,0.05)' }}>
                         <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: item.isActive ? '#3b82f6' : '#f3f4f6', color: item.isActive ? 'white' : '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>{i + 1}</div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{item.title}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{Math.floor(item.duration / 60)} min</div>
+                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{t('minutesShort', { n: Math.floor(item.duration / 60) })}</div>
                         </div>
                         {(isHost || isCoHost) && !item.isActive && (
                           <button
@@ -2533,7 +2553,7 @@ export default function Meeting() {
                             onClick={() => socket?.emit('agenda:start', { meetingId, agendaId: item.id })}
                             style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0.4rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer' }}
                           >
-                            Start
+                            {t('start')}
                           </button>
                         )}
                       </div>
@@ -2548,11 +2568,11 @@ export default function Meeting() {
               <div style={{ padding: '1.25rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {(isHost || isCoHost) && (
                   <div style={{ background: '#ffffff', padding: '1rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600 }}>Create Poll</h3>
+                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600 }}>{t('createPoll')}</h3>
                     <input
                       data-testid="poll-question-input"
                       type="text"
-                      placeholder="Question"
+                      placeholder={t('questionPlaceholder')}
                       value={newPollQuestion}
                       onChange={(e) => setNewPollQuestion(e.target.value)}
                       style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid #d1d5db', marginBottom: '0.75rem', fontSize: '0.9rem' }}
@@ -2562,7 +2582,7 @@ export default function Meeting() {
                         data-testid="poll-option-input"
                         key={i}
                         type="text"
-                        placeholder={`Option ${i + 1}`}
+                        placeholder={t('optionPlaceholder', { n: i + 1 })}
                         value={opt}
                         onChange={(e) => {
                           const updated = [...newPollOptions];
@@ -2577,7 +2597,7 @@ export default function Meeting() {
                       onClick={() => setNewPollOptions([...newPollOptions, ''])}
                       style={{ width: '100%', padding: '0.5rem', border: '1px dashed #3b82f6', color: '#3b82f6', background: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '1rem' }}
                     >
-                      + Add Option
+                      {t('addOption')}
                     </button>
                     <button
                       data-testid="poll-launch"
@@ -2589,15 +2609,15 @@ export default function Meeting() {
                       }}
                       style={{ width: '100%', padding: '0.75rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}
                     >
-                      Launch Poll
+                      {t('launchPoll')}
                     </button>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Recent Polls</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{t('recentPolls')}</h3>
                   {polls.length === 0 ? (
-                    <p style={{ color: '#8f95a3', fontSize: '0.875rem' }}>No polls yet.</p>
+                    <p style={{ color: '#8f95a3', fontSize: '0.875rem' }}>{t('noPolls')}</p>
                   ) : (
                     polls.map((poll) => {
                       const totalVotes = poll.options.reduce((sum: number, opt: any) => sum + (opt.responses?.length || 0), 0);
@@ -2626,7 +2646,7 @@ export default function Meeting() {
                               );
                             })}
                           </div>
-                          <div data-testid="poll-total-votes" style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center' }}>{totalVotes} total votes</div>
+                          <div data-testid="poll-total-votes" style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#9ca3af', textAlign: 'center' }}>{t('totalVotes', { n: totalVotes })}</div>
                         </div>
                       );
                     })
@@ -2643,11 +2663,11 @@ export default function Meeting() {
                     type="text"
                     value={peopleSearch}
                     onChange={(e) => setPeopleSearch(e.target.value)}
-                    placeholder="Find a participant"
+                    placeholder={t('findParticipant')}
                     style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.85rem', outline: 'none', background: '#ffffff' }}
                   />
                 </div>
-                {participants.length === 0 && <p style={{ color: '#8f95a3', fontSize: '0.875rem', marginTop: '1rem' }}>Waiting for others to join...</p>}
+                {participants.length === 0 && <p style={{ color: '#8f95a3', fontSize: '0.875rem', marginTop: '1rem' }}>{t('waitingOthers')}</p>}
                 {[...participants]
                   .sort((a, b) => {
                     const isAHost = meetingInfo?.hostId === a.userId;
@@ -2670,13 +2690,13 @@ export default function Meeting() {
                     if (!peopleSearch.trim()) return true;
                     // Guests aren't in participantUsers (DB) — fall back to socket profile name
                     const resolvedName = meetingInfo?.participantUsers?.[p.userId]?.name || p.user?.name;
-                    const name = resolvedName || `User ${p.userId?.substring(0, 5)}`;
+                    const name = resolvedName || t('userN', { id: p.userId?.substring(0, 5) ?? '' });
                     return name.toLowerCase().includes(peopleSearch.trim().toLowerCase());
                   })
                   .map((p, i) => {
                     // Guests aren't in participantUsers (DB) — fall back to socket profile name
                     const resolvedName = meetingInfo?.participantUsers?.[p.userId]?.name || p.user?.name;
-                    const name = resolvedName || `User ${p.userId?.substring(0, 5)}`;
+                    const name = resolvedName || t('userN', { id: p.userId?.substring(0, 5) ?? '' });
                     const isMe = currentUserId && p.userId === currentUserId;
                     const isHostLabel = meetingInfo?.hostId && p.userId === meetingInfo.hostId;
                     const isCoHostLabel = p.role === 'CO_HOST';
@@ -2699,7 +2719,7 @@ export default function Meeting() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                           <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
-                            {isMe ? 'You' : name}{isHostLabel ? ' (Host)' : ''}{isCoHostLabel ? ' (Co-Host)' : ''} {isRaised && <span style={{ background: '#3b82f6', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', marginLeft: '0.25rem' }}>#{queueIndex + 1}</span>}
+                            {isMe ? t('you') : name}{isHostLabel ? ` ${t('hostLabel')}` : ''}{isCoHostLabel ? ` ${t('coHostLabel')}` : ''} {isRaised && <span style={{ background: '#3b82f6', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', marginLeft: '0.25rem' }}>#{queueIndex + 1}</span>}
                           </span>
                         </div>
                         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
@@ -2711,7 +2731,7 @@ export default function Meeting() {
                                 data-testid="participant-actions-btn"
                                 onClick={() => setOpenParticipantMenuUserId((prev) => (prev === p.userId ? null : p.userId))}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                aria-label="Participant actions"
+                                aria-label={t('participantActions')}
                                 data-participant-menu-button="true"
                               >
                                 <MoreVertical size={16} />
@@ -2723,7 +2743,7 @@ export default function Meeting() {
                                       if (socket) socket.emit('meeting:kick', { meetingId, targetSocketId: p.socketId });
                                       setOpenParticipantMenuUserId(null);
                                     }} data-testid="participant-kick" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
-                                      Kick participant
+                                      {t('kick')}
                                     </button>
                                   )}
                                   {audioEnabled ? (
@@ -2731,14 +2751,14 @@ export default function Meeting() {
                                       if (socket) socket.emit('media:force-mute', { meetingId, targetSocketId: p.socketId });
                                       setOpenParticipantMenuUserId(null);
                                     }} data-testid="participant-mute" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
-                                      Mute user
+                                      {t('muteUser')}
                                     </button>
                                   ) : (
                                     <button onClick={() => {
                                       if (socket) socket.emit('media:ask-unmute', { meetingId, targetSocketId: p.socketId });
                                       setOpenParticipantMenuUserId(null);
                                     }} data-testid="participant-ask-unmute" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
-                                      Ask to unmute
+                                      {t('askUnmute')}
                                     </button>
                                   )}
                                   {isHost && !isCoHostLabel && (
@@ -2746,7 +2766,7 @@ export default function Meeting() {
                                       if (socket) socket.emit('meeting:make-cohost', { meetingId, targetUserId: p.userId });
                                       setOpenParticipantMenuUserId(null);
                                     }} data-testid="participant-make-cohost" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
-                                      Make co-host
+                                      {t('makeCoHost')}
                                     </button>
                                   )}
                                   {isHost && isCoHostLabel && (
@@ -2754,7 +2774,7 @@ export default function Meeting() {
                                       if (socket) socket.emit('meeting:remove-cohost', { meetingId, targetUserId: p.userId });
                                       setOpenParticipantMenuUserId(null);
                                     }} data-testid="participant-remove-cohost" style={{ background: 'none', border: 'none', color: 'white', padding: '0.5rem 0.6rem', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
-                                      Remove co-host
+                                      {t('removeCoHost')}
                                     </button>
                                   )}
                                 </div>
@@ -2779,7 +2799,7 @@ export default function Meeting() {
           <span>{currentTime}</span>
           <div data-testid="connection-status" data-connected={isConnected} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', background: 'rgba(0,0,0,0.35)', padding: '0.2rem 0.6rem', borderRadius: '999px', color: '#f1f3f4' }}>
             <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: isConnected ? '#22c55e' : '#eab308' }}></span>
-            {isConnected ? 'Connected' : 'Connecting...'}
+            {isConnected ? t('connected') : t('connectingDots')}
           </div>
         </div>
 
@@ -2796,7 +2816,7 @@ export default function Meeting() {
             data-active={audioOnly}
             onClick={toggleAudioOnly}
             className="control-btn"
-            title={audioOnly ? 'Data saver ON — remote video paused. Click to resume.' : 'Data saver — stop downloading remote video to save bandwidth'}
+            title={audioOnly ? t('dataSaverOn') : t('dataSaverOff')}
             style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: audioOnly ? '#0f4c75' : colors.bgDarkNavy, color: audioOnly ? '#ffd54a' : 'white', transition: 'all 0.2s' }}
           >
             <Gauge size={20} />
@@ -2831,7 +2851,7 @@ export default function Meeting() {
             onClick={() => setActiveTab(activeTab === 'agenda' ? null : 'agenda')}
             data-testid="ctrl-mobile-agenda"
             className="control-btn mobile-action-btn"
-            aria-label="Agenda"
+            aria-label={t('tabAgenda')}
             style={{ display: 'none', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'agenda' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
           >
             <ListChecks size={20} />
@@ -2840,7 +2860,7 @@ export default function Meeting() {
             onClick={() => setActiveTab(activeTab === 'polls' ? null : 'polls')}
             data-testid="ctrl-mobile-polls"
             className="control-btn mobile-action-btn"
-            aria-label="Polls"
+            aria-label={t('tabPolls')}
             style={{ display: 'none', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'polls' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
           >
             <BarChart3 size={20} />
@@ -2849,7 +2869,7 @@ export default function Meeting() {
             onClick={() => setActiveTab(activeTab === 'chat' ? null : 'chat')}
             data-testid="ctrl-mobile-chat"
             className="control-btn mobile-action-btn"
-            aria-label="Chat"
+            aria-label={t('tabChat')}
             style={{ display: 'none', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'chat' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
           >
             <MessageSquare size={20} />
@@ -2858,7 +2878,7 @@ export default function Meeting() {
             onClick={() => setActiveTab(activeTab === 'people' ? null : 'people')}
             data-testid="ctrl-mobile-people"
             className="control-btn mobile-action-btn"
-            aria-label="People"
+            aria-label={t('tabPeople')}
             style={{ display: 'none', position: 'relative', width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', background: activeTab === 'people' ? '#0f4c75' : colors.bgDarkNavy, color: 'white', transition: 'all 0.2s' }}
           >
             <Users size={20} />
@@ -2896,7 +2916,7 @@ export default function Meeting() {
                   setIsDeviceSettingsOpen(true);
                   setIsMoreMenuOpen(false);
                 }} style={{ background: 'none', border: 'none', color: 'white', padding: '0.55rem 0.75rem', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
-                  Settings
+                  {t('settings')}
                 </button>
                 <button
                   data-testid="more-screen-share"
@@ -2907,7 +2927,7 @@ export default function Meeting() {
                   }}
                   style={{ display: 'none', background: 'none', border: 'none', color: 'white', padding: '0.55rem 0.75rem', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}
                 >
-                  {isScreenSharing ? 'Stop sharing' : 'Screen share'}
+                  {isScreenSharing ? t('stopSharing') : t('screenShare')}
                 </button>
               </div>
             )}
@@ -2925,7 +2945,7 @@ export default function Meeting() {
             </span>
           </button>
           <button data-testid="ctrl-tab-chat" onClick={() => setActiveTab(activeTab === 'chat' ? null : 'chat')} style={{ background: 'none', border: 'none', color: activeTab === 'chat' ? colors.bgActiveTab : 'inherit', cursor: 'pointer' }}><MessageSquare size={20} /></button>
-          <button data-testid="ctrl-leave" onClick={() => setIsLeaveMenuOpen((prev) => !prev)} title="Leave options" className="leave-btn" style={{ background: colors.red, border: 'none', color: 'white', cursor: 'pointer', width: '64px', height: '44px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button data-testid="ctrl-leave" onClick={() => setIsLeaveMenuOpen((prev) => !prev)} title={t('leaveOptions')} className="leave-btn" style={{ background: colors.red, border: 'none', color: 'white', cursor: 'pointer', width: '64px', height: '44px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <PhoneOff size={20} />
           </button>
           {isLeaveMenuOpen && (
@@ -2935,14 +2955,14 @@ export default function Meeting() {
                   if (socket) socket.emit('meeting:end', { meetingId });
                   setIsLeaveMenuOpen(false);
                 }} data-testid="leave-end-meeting" style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                  End Meeting
+                  {t('endMeeting')}
                 </button>
               )}
               <button onClick={() => {
                 setIsLeaveMenuOpen(false);
                 router.push('/');
               }} data-testid="leave-leave-meeting" style={{ background: '#374151', border: 'none', color: 'white', borderRadius: '10px', padding: '0.5rem 0.75rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                Leave Meeting
+                {t('leaveMeeting')}
               </button>
             </div>
           )}
@@ -2959,8 +2979,8 @@ export default function Meeting() {
               <Video size={32} />
             </div>
             <div>
-              <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>Ready to Join?</h2>
-              <p style={{ margin: 0, color: '#8f95a3', fontSize: '0.875rem', lineHeight: '1.5' }}>The browser blocked autoplay. Click the button below to enable audio and video.</p>
+              <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>{t('readyToJoin')}</h2>
+              <p style={{ margin: 0, color: '#8f95a3', fontSize: '0.875rem', lineHeight: '1.5' }}>{t('autoplayBlocked')}</p>
             </div>
             <button
               data-testid="autoplay-enable-btn"
@@ -2984,7 +3004,7 @@ export default function Meeting() {
               }}
               style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: 'none', background: colors.blueHighlight, color: 'white', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', transition: 'transform 0.2s' }}
             >
-              Join Meeting
+              {t('joinMeeting')}
             </button>
           </div>
         </div>

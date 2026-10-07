@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useI18n } from '@/lib/i18n';
 
 export default function NotFound() {
+  const { t } = useI18n();
   return (
     <div style={{
       minHeight: '100vh',
@@ -22,9 +24,9 @@ export default function NotFound() {
         </svg>
       </div>
       
-      <h1 style={{ fontSize: '2.5rem', fontWeight: 400, marginBottom: '1rem', letterSpacing: '-0.01em' }}>Page not found</h1>
+      <h1 style={{ fontSize: '2.5rem', fontWeight: 400, marginBottom: '1rem', letterSpacing: '-0.01em' }}>{t('notFoundTitle')}</h1>
       <p style={{ color: '#5f6368', fontSize: '1.1rem', marginBottom: '2.5rem', maxWidth: '500px', lineHeight: '1.5' }}>
-        Looks like you're trying to access a page that doesn't exist or has been moved.
+        {t('notFoundBody')}
       </p>
       
       <Link href="/" style={{
@@ -38,7 +40,7 @@ export default function NotFound() {
         boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)',
         transition: 'background-color 0.2s'
       }}>
-        Back to Home
+        {t('backToHome')}
       </Link>
       
       <div style={{ position: 'absolute', bottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '10px', color: '#5f6368' }}>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useI18n } from '@/lib/i18n';
+import LanguageSwitch from '../LanguageSwitch';
 
 const getApiBase = () => {
   const env = process.env.NEXT_PUBLIC_API_URL;
@@ -14,6 +16,7 @@ const getApiBase = () => {
 const unwrap = <T = any>(json: any): T => json?.data ?? json;
 
 function AuthPageInner() {
+  const { t, ta } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
@@ -61,14 +64,14 @@ function AuthPageInner() {
           router.push(redirectTo);
         } else if (mode === 'register') {
           setMode('login');
-          setError('Registration successful! Please login.');
+          setError(t('registrationOk'));
         }
       } else {
         // Error shape: { success: false, error: '...', statusCode: ... }
-        setError(json.error || json.message || `${mode === 'login' ? 'Login' : 'Registration'} failed`);
+        setError(ta(json.error || json.message || (mode === 'login' ? t('loginFailed') : t('registrationFailed'))));
       }
     } catch (err) {
-      setError('Cannot connect to server. Is backend running?');
+      setError(t('errBackendDown'));
     } finally {
       setLoading(false);
     }
@@ -76,12 +79,15 @@ function AuthPageInner() {
 
   return (
     <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8f9fa', padding: '1rem' }}>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+        <LanguageSwitch />
+      </div>
       <div style={{ width: '100%', maxWidth: '400px', background: 'white', padding: '2.5rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #e1e4e8' }}>
         <h1 data-testid="auth-title" style={{ fontSize: '1.75rem', fontWeight: 600, marginBottom: '0.5rem', textAlign: 'center', color: '#202124' }}>
-          {mode === 'login' ? 'Sign In' : 'Create Account'}
+          {mode === 'login' ? t('signIn') : t('createAccount')}
         </h1>
         <p style={{ color: '#5f6368', textAlign: 'center', marginBottom: '2rem', fontSize: '0.875rem' }}>
-          {mode === 'login' ? 'Use your BeeCollab account' : 'Sign up to start collaborating'}
+          {mode === 'login' ? t('loginSubtitle') : t('registerSubtitle')}
         </p>
 
         {error && <div data-testid="auth-error" style={{ color: '#d93025', marginBottom: '1.5rem', textAlign: 'center', background: '#fce8e6', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem' }}>{error}</div>}
@@ -89,7 +95,7 @@ function AuthPageInner() {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {mode === 'register' && (
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>FULL NAME</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>{t('fullName')}</label>
               <input
                 data-testid="auth-name-input"
                 type="text"
@@ -102,7 +108,7 @@ function AuthPageInner() {
             </div>
           )}
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>EMAIL ADDRESS</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>{t('emailAddress')}</label>
             <input
               data-testid="auth-email-input"
               type="email"
@@ -114,7 +120,7 @@ function AuthPageInner() {
             />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>PASSWORD</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#3c4043', marginBottom: '0.5rem' }}>{t('passwordLabel')}</label>
             <div style={{ position: 'relative' }}>
               <input
                 data-testid="auth-password-input"
@@ -130,7 +136,7 @@ function AuthPageInner() {
                 data-testid="auth-toggle-password"
                 type="button"
                 onClick={() => setShowPassword(p => !p)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 style={{
                   position: 'absolute',
                   top: '50%',
@@ -167,10 +173,10 @@ function AuthPageInner() {
                 color: password.length === 0 ? '#5f6368' : password.length >= 6 ? '#1e8e3e' : '#d93025'
               }}>
                 {password.length === 0
-                  ? 'Minimum 6 characters'
+                  ? t('minChars')
                   : password.length >= 6
-                    ? '✓ Password meets requirements'
-                    : `Minimum 6 characters (${password.length}/6)`}
+                    ? t('pwdOk')
+                    : t('minCharsCount', { n: password.length })}
               </div>
             )}
           </div>
@@ -192,31 +198,31 @@ function AuthPageInner() {
               opacity: loading ? 0.7 : 1
             }}
           >
-            {loading ? 'Processing...' : (mode === 'login' ? 'Sign In' : 'Register')}
+            {loading ? t('processing') : (mode === 'login' ? t('signIn') : t('register'))}
           </button>
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem', color: '#5f6368' }}>
           {mode === 'login' ? (
             <>
-              Don't have an account?{' '}
+              {t('noAccountQ')}{' '}
               <button
                 data-testid="auth-switch-to-register"
                 onClick={() => setMode('register')}
                 style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 600, cursor: 'pointer', padding: 0 }}
               >
-                Sign up
+                {t('signUp')}
               </button>
             </>
           ) : (
             <>
-              Already have an account?{' '}
+              {t('haveAccountQ')}{' '}
               <button
                 data-testid="auth-switch-to-login"
                 onClick={() => setMode('login')}
                 style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 600, cursor: 'pointer', padding: 0 }}
               >
-                Sign in
+                {t('signInLink')}
               </button>
             </>
           )}
@@ -228,20 +234,20 @@ function AuthPageInner() {
             onClick={() => router.push('/')}
             style={{ background: 'none', border: 'none', color: '#5f6368', cursor: 'pointer', fontSize: '0.875rem', textDecoration: 'underline' }}
           >
-            Back to Home
+            {t('backToHome')}
           </button>
         </div>
 
         {/* Guest divider */}
         <div style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ flex: 1, height: '1px', background: '#e1e4e8' }} />
-          <span style={{ fontSize: '0.75rem', color: '#5f6368', whiteSpace: 'nowrap' }}>or continue as guest</span>
+          <span style={{ fontSize: '0.75rem', color: '#5f6368', whiteSpace: 'nowrap' }}>{t('orContinueGuest')}</span>
           <div style={{ flex: 1, height: '1px', background: '#e1e4e8' }} />
         </div>
 
         <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <p style={{ fontSize: '0.8rem', color: '#5f6368', textAlign: 'center', margin: 0 }}>
-            No account needed — just enter your name and join with a room code.
+            {t('guestIntro')}
           </p>
           {guestError && (
             <div data-testid="auth-guest-error" style={{ color: '#d93025', background: '#fce8e6', padding: '0.6rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center' }}>
@@ -251,7 +257,7 @@ function AuthPageInner() {
           <input
             data-testid="auth-guest-name-input"
             type="text"
-            placeholder="Your display name"
+            placeholder={t('guestNamePlaceholder')}
             value={guestName}
             onChange={(e) => setGuestName(e.target.value)}
             style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #dadce0', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
@@ -277,10 +283,10 @@ function AuthPageInner() {
                   localStorage.setItem('guestName', guestName.trim());
                   router.push(redirectTo);
                 } else {
-                  setGuestError(json.error || 'Failed to continue as guest');
+                  setGuestError(json.error ? ta(json.error) : t('errGuestContinue'));
                 }
               } catch {
-                setGuestError('Cannot connect to server.');
+                setGuestError(t('errCannotConnect'));
               } finally {
                 setGuestLoading(false);
               }
@@ -297,7 +303,7 @@ function AuthPageInner() {
               opacity: guestLoading ? 0.7 : 1,
             }}
           >
-            {guestLoading ? 'Joining...' : 'Continue as Guest'}
+            {guestLoading ? t('joining') : t('continueAsGuest')}
           </button>
         </div>
       </div>

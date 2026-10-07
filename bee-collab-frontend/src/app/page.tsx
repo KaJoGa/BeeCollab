@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './page.module.css';
+import { useI18n } from '@/lib/i18n';
+import LanguageSwitch from './LanguageSwitch';
 
 const getApiBase = () => {
   const env = process.env.NEXT_PUBLIC_API_URL;
@@ -17,6 +19,7 @@ const getApiBase = () => {
 const unwrap = <T = any>(json: any): T => json?.data ?? json;
 
 export default function Home() {
+  const { t, ta } = useI18n();
   const router = useRouter();
   const [serverStatus, setServerStatus] = useState<'checking' | 'online' | 'offline'>('checking');
   const [pingData, setPingData] = useState<string | null>(null);
@@ -143,8 +146,8 @@ export default function Home() {
   };
 
   const handleGuestJoin = async () => {
-    if (guestJoinName.trim().length < 2) { setGuestJoinError('Name must be at least 2 characters.'); return; }
-    if (!guestJoinCode.trim()) { setGuestJoinError('Please enter a room code.'); return; }
+    if (guestJoinName.trim().length < 2) { setGuestJoinError(t('errNameMin')); return; }
+    if (!guestJoinCode.trim()) { setGuestJoinError(t('errRoomCode')); return; }
     setGuestJoinLoading(true);
     setGuestJoinError('');
     try {
@@ -161,10 +164,10 @@ export default function Home() {
         localStorage.setItem('guestName', guestJoinName.trim());
         router.push(`/meeting/${guestJoinCode.trim()}`);
       } else {
-        setGuestJoinError(json.error || 'Failed to join as guest');
+        setGuestJoinError(json.error ? ta(json.error) : t('errGuestJoin'));
       }
     } catch {
-      setGuestJoinError('Cannot connect to server.');
+      setGuestJoinError(t('errCannotConnect'));
     } finally {
       setGuestJoinLoading(false);
     }
@@ -176,7 +179,7 @@ export default function Home() {
   const handleJoin = async () => {
     if (meetingCode.trim()) {
       setLoading(true);
-      setLoadingMessage('Joining meeting...');
+      setLoadingMessage(t('joiningMeetingMsg'));
 
       const apiBase = getApiBase();
       const token = localStorage.getItem('token');
@@ -217,12 +220,12 @@ export default function Home() {
 
     const maxParticipants = Number(newMeetingForm.maxParticipants);
     if (Number.isNaN(maxParticipants) || maxParticipants < 2 || maxParticipants > 10) {
-      setNewMeetingError('Number of participants must be between 2 and 10.');
+      setNewMeetingError(t('errParticipantsRange'));
       return;
     }
 
     setLoading(true);
-    setLoadingMessage('Setting up meeting...');
+    setLoadingMessage(t('settingUpMeeting'));
     setNewMeetingError('');
 
     const startedAt = Date.now();
@@ -251,12 +254,12 @@ export default function Home() {
         router.push(`/meeting/${data.id}`);
       } else {
         setLoading(false);
-        setNewMeetingError('Failed to create meeting. Please try again.');
+        setNewMeetingError(t('errCreateFailed'));
       }
     } catch (err) {
       console.error(err);
       setLoading(false);
-      setNewMeetingError('An error occurred while creating the meeting.');
+      setNewMeetingError(t('errCreateException'));
     }
   };
 
@@ -279,11 +282,12 @@ export default function Home() {
 
         <div className={styles.headerRight}>
           <span className={styles.dateTimeInline}>{currentTime}</span>
+          <LanguageSwitch />
           {isLoggedIn ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {userName && (
                 <span data-testid="home-user-name" style={{ fontSize: '0.875rem', color: isGuest ? '#e37400' : '#3c4043', fontWeight: 500 }}>
-                  {isGuest ? '👤 Guest: ' : '👤 '}{userName}
+                  {isGuest ? `👤 ${t('guestWord')}: ` : '👤 '}{userName}
                 </span>
               )}
               <button
@@ -292,7 +296,7 @@ export default function Home() {
                 onClick={() => setShowLogoutConfirm(true)}
                 style={{ background: 'none', border: '1px solid #dadce0', color: '#d93025', fontWeight: 500, fontSize: '14px', cursor: 'pointer', padding: '8px 16px', borderRadius: '4px' }}
               >
-                {isGuest ? 'Exit Guest' : 'Logout'}
+                {isGuest ? t('exitGuest') : t('logout')}
               </button>
             </div>
           ) : (
@@ -302,7 +306,7 @@ export default function Home() {
               onClick={() => router.push('/login')}
               style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 500, fontSize: '16px', cursor: 'pointer' }}
             >
-              Sign In
+              {t('signIn')}
             </button>
           )}
         </div>
@@ -310,26 +314,26 @@ export default function Home() {
 
       <main className={styles.mainContent}>
         <div className={styles.leftColumn}>
-          <h1 className={styles.title}>Premium video meetings.<br />Now free for everyone.</h1>
+          <h1 className={styles.title}>{t('heroLine1')}<br />{t('heroLine2')}</h1>
           <p className={styles.subtitle}>
-            We re-engineered the service we built for secure business meetings, BeeCollab, to make it free and available for all.
+            {t('heroSubtitle')}
           </p>
 
           {isCreating ? (
             <div style={{ background: '#ffffff', border: '1px solid #dadce0', padding: '1.5rem', borderRadius: '12px', width: '100%', maxWidth: '400px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', alignSelf: 'center' }}>
-              <h3 style={{ margin: '0 0 1rem 0', color: '#202124' }}>Create New Meeting</h3>
+              <h3 style={{ margin: '0 0 1rem 0', color: '#202124' }}>{t('createNewMeeting')}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>Meeting Name</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>{t('meetingNameLabel')}</label>
                   <input data-testid="new-meeting-title" type="text" value={newMeetingForm.title} onChange={e => setNewMeetingForm({ ...newMeetingForm, title: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>Duration (minutes)</label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>{t('durationLabel')}</label>
                     <input data-testid="new-meeting-duration" type="number" value={newMeetingForm.duration} onChange={e => setNewMeetingForm({ ...newMeetingForm, duration: parseInt(e.target.value) })} min="1" style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>Max. Participants</label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#3c4043', marginBottom: '0.5rem' }}>{t('maxParticipantsLabel')}</label>
                     <input data-testid="new-meeting-max-participants" type="number" value={newMeetingForm.maxParticipants} onChange={e => setNewMeetingForm({ ...newMeetingForm, maxParticipants: parseInt(e.target.value) })} min="2" max="10" style={{ width: '100%', padding: '0.75rem', border: '1px solid #dadce0', borderRadius: '8px', fontSize: '1rem' }} />
                   </div>
                 </div>
@@ -339,8 +343,8 @@ export default function Home() {
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                  <button data-testid="new-meeting-cancel" onClick={() => setIsCreating(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontWeight: 500, color: '#3c4043' }}>Cancel</button>
-                  <button data-testid="new-meeting-submit" onClick={handleCreateNewMeeting} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: 'none', background: '#1a73e8', color: 'white', cursor: 'pointer', fontWeight: 500 }}>Create</button>
+                  <button data-testid="new-meeting-cancel" onClick={() => setIsCreating(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontWeight: 500, color: '#3c4043' }}>{t('cancel')}</button>
+                  <button data-testid="new-meeting-submit" onClick={handleCreateNewMeeting} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: 'none', background: '#1a73e8', color: 'white', cursor: 'pointer', fontWeight: 500 }}>{t('create')}</button>
                 </div>
               </div>
             </div>
@@ -358,14 +362,14 @@ export default function Home() {
                   setNewMeetingError('');
                   setIsCreating(true);
                 }}
-                title={isGuest ? "Guests cannot create meetings" : hasActiveMeeting ? "Resume active meeting" : "Create new meeting"}
+                title={isGuest ? t('guestsCannotCreate') : hasActiveMeeting ? t('resumeActiveMeeting') : t('createNewMeetingTitle')}
                 style={{ opacity: isGuest ? 0.45 : 1, cursor: isGuest ? 'not-allowed' : 'pointer' }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" />
                   <rect x="3" y="6" width="12" height="12" rx="2" />
                 </svg>
-                {hasActiveMeeting ? 'Active Meeting' : 'New meeting'}
+                {hasActiveMeeting ? t('activeMeeting') : t('newMeeting')}
               </button>
 
               <div className={styles.inputGroup}>
@@ -377,7 +381,7 @@ export default function Home() {
                 <input
                   data-testid="join-code-input"
                   type="text"
-                  placeholder="Enter a code or link"
+                  placeholder={t('codePlaceholder')}
                   className={styles.codeInput}
                   value={meetingCode}
                   onChange={(e) => setMeetingCode(e.target.value)}
@@ -391,7 +395,7 @@ export default function Home() {
                 disabled={!meetingCode.trim()}
                 onClick={handleJoin}
               >
-                Join
+                {t('join')}
               </button>
             </div>
           )}
@@ -403,22 +407,22 @@ export default function Home() {
             <div style={{ marginTop: '0.5rem' }}>
               {!showGuestJoin ? (
                 <p style={{ fontSize: '0.875rem', color: '#5f6368', textAlign: 'center' }}>
-                  No account?{' '}
+                  {t('noAccount')}{' '}
                   <button
                     data-testid="guest-join-open"
                     onClick={() => setShowGuestJoin(true)}
                     style={{ background: 'none', border: 'none', color: '#1a73e8', fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: '0.875rem' }}
                   >
-                    Join as Guest
+                    {t('joinAsGuest')}
                   </button>
                 </p>
               ) : (
                 <div style={{ background: '#f8f9fa', border: '1px solid #e1e4e8', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: '#202124' }}>Join as Guest</p>
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: '#202124' }}>{t('joinAsGuest')}</p>
                   <input
                     data-testid="guest-name-input"
                     type="text"
-                    placeholder="Your display name"
+                    placeholder={t('guestNamePlaceholder')}
                     value={guestJoinName}
                     onChange={e => setGuestJoinName(e.target.value)}
                     style={{ padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #dadce0', fontSize: '0.95rem', outline: 'none' }}
@@ -426,7 +430,7 @@ export default function Home() {
                   <input
                     data-testid="guest-code-input"
                     type="text"
-                    placeholder="Room code (e.g. A1B2C3D4)"
+                    placeholder={t('roomCodePlaceholder')}
                     value={guestJoinCode}
                     onChange={e => setGuestJoinCode(e.target.value.toUpperCase())}
                     onKeyDown={e => e.key === 'Enter' && handleGuestJoin()}
@@ -437,7 +441,7 @@ export default function Home() {
                   )}
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button data-testid="guest-join-cancel" onClick={() => { setShowGuestJoin(false); setGuestJoinError(''); }} style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontSize: '0.875rem', color: '#5f6368' }}>
-                      Cancel
+                      {t('cancel')}
                     </button>
                     <button
                       data-testid="guest-join-submit"
@@ -445,7 +449,7 @@ export default function Home() {
                       disabled={guestJoinLoading}
                       style={{ flex: 2, padding: '0.65rem', borderRadius: '8px', border: 'none', background: '#1a73e8', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '0.875rem', opacity: guestJoinLoading ? 0.7 : 1 }}
                     >
-                      {guestJoinLoading ? 'Joining...' : 'Join Meeting'}
+                      {guestJoinLoading ? t('joining') : t('joinMeeting')}
                     </button>
                   </div>
                 </div>
@@ -454,7 +458,7 @@ export default function Home() {
           )}
 
           <div className={styles.learnMore}>
-            <a href="#" className={styles.learnMoreLink}>Learn more</a> about BeeCollab
+            <a href="#" className={styles.learnMoreLink}>{t('learnMore')}</a> {t('aboutApp')}
           </div>
         </div>
 
@@ -462,16 +466,16 @@ export default function Home() {
           <div className={styles.carousel}>
             <Image
               src="/meet_illustration.png"
-              alt="People connecting on a video call"
+              alt={t('heroAlt')}
               width={360}
               height={240}
               priority
               className={styles.illustration}
               style={{ height: 'auto' }}
             />
-            <h2 className={styles.carouselTitle}>Get a link you can share</h2>
+            <h2 className={styles.carouselTitle}>{t('carouselTitle')}</h2>
             <p className={styles.carouselText}>
-              Click <strong>New meeting</strong> to get a link you can send to people you want to meet with
+              {t('carouselClick')} <strong>{t('newMeeting')}</strong> {t('carouselRest')}
             </p>
           </div>
         </div>
@@ -487,7 +491,7 @@ export default function Home() {
 
       <div className={styles.statusIndicator} data-testid="server-status" data-status={serverStatus}>
         <div className={`${styles.statusDot} ${styles[serverStatus]}`}></div>
-        <span>{serverStatus === 'checking' ? 'Connecting to server...' : serverStatus === 'online' ? 'System Online' : 'System Offline'}</span>
+        <span>{serverStatus === 'checking' ? t('statusConnecting') : serverStatus === 'online' ? t('statusOnline') : t('statusOffline')}</span>
       </div>
 
       {showLogoutConfirm && (
@@ -519,10 +523,10 @@ export default function Home() {
             }}
           >
             <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: '#202124', fontWeight: 600 }}>
-              Sign out of BeeCollab?
+              {t('signOutTitle')}
             </h3>
             <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.875rem', color: '#5f6368', lineHeight: 1.5 }}>
-              You will be signed out of this account. You'll need to sign in again to continue.
+              {t('signOutBody')}
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
               <button
@@ -530,14 +534,14 @@ export default function Home() {
                 onClick={() => setShowLogoutConfirm(false)}
                 style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: '1px solid #dadce0', background: 'transparent', cursor: 'pointer', fontWeight: 500, color: '#3c4043', fontSize: '0.875rem' }}
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 data-testid="logout-confirm"
                 onClick={performLogout}
                 style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: 'none', background: '#d93025', color: 'white', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem' }}
               >
-                Sign out
+                {t('signOut')}
               </button>
             </div>
           </div>
@@ -589,7 +593,7 @@ export default function Home() {
 
           <div style={{ textAlign: 'center', maxWidth: '320px' }}>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#202124', margin: '0 0 0.5rem 0' }}>{loadingMessage}</h2>
-            <p style={{ fontSize: '0.875rem', color: '#5f6368', margin: 0 }}>Please wait a moment...</p>
+            <p style={{ fontSize: '0.875rem', color: '#5f6368', margin: 0 }}>{t('pleaseWait')}</p>
           </div>
 
           <div style={{ position: 'absolute', bottom: '3rem', display: 'flex', gap: '0.5rem' }}>

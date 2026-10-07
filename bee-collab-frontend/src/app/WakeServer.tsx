@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/lib/i18n';
 
 // Free hosting (Render + Neon) sleeps when idle. Mounted once in the root layout,
 // this pings GET /health on every full page load — home, login, or a direct
@@ -19,6 +20,7 @@ const getApiBase = () => {
 };
 
 export default function WakeServer() {
+  const { t } = useI18n();
   const [waking, setWaking] = useState(false);
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export default function WakeServer() {
         borderBottom: '1px solid #f9e0a0',
       }}
     >
-      Waking up the server, this can take up to a minute…
+      {t('wakeBanner')}
     </div>
   );
 }
