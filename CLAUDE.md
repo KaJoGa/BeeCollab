@@ -4,6 +4,8 @@ College project: Google-Meet-style video meetings (WebRTC **full mesh**, no SFU)
 
 **Live:** frontend https://beecollab.vercel.app (Vercel Hobby) · backend https://beecollab-rwbj.onrender.com (Render free) · DB Neon free Postgres · TURN Cloudflare. Free tiers sleep when idle, so the frontend wakes the backend on every page load via `GET /health` (no keep-alive pinging). `/health` returns `{status, db, commit, uptimeSeconds}`; `commit` is how you confirm which build is live after a push (`cd test && API_URL=… npm run wait -- --commit <sha>`).
 
+**`test/` is LOCAL-ONLY and git-ignored on purpose** (owner decision: it exists for the QA agent only). Never `git add -f test`, never push it. Files stay on disk; edit them freely. Earlier commits on `main` still contain it in history (it was pushed before this decision).
+
 ## Layout
 Monorepo, no root package.json. Each app has its own `npm install`.
 

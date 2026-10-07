@@ -75,7 +75,7 @@ Windows shortcut: `run.bat` installs dependencies and starts both apps. Environm
 Every push to `main` redeploys both apps. `GET /health` returns `{ status, db, commit, uptimeSeconds }` so you can see which build is live. Step-by-step account setup: [SETUP.md](SETUP.md). Roadmap and decisions: [PLAN.md](PLAN.md). Change history of the deployment work: [CHANGES.md](CHANGES.md).
 
 ## Testing
-Everything for testers lives in **[`test/`](test/README.md)**: system and API documentation, feature inventory, test ideas, a risk list, Playwright E2E specs (real WebRTC with fake devices), and REST/WebSocket smoke tools.
+Everything for testers lives in the local-only folder **`test/`** (git-ignored on purpose: it is handed to the QA agent directly and is not part of the published repository, so the `test/...` links in this file only work on the owner's machine): system and API documentation, feature inventory, test ideas, a risk list, Playwright E2E specs (real WebRTC with fake devices), and REST/WebSocket smoke tools.
 ```bash
 cd test && npm install && npx playwright install chromium
 npm run smoke     # ≈ 90 REST + WebSocket checks
@@ -88,7 +88,7 @@ Backend unit tests: `cd bee-collab-backend && npm test` (note: 6 generated suite
 BeeCollab/
 ├── bee-collab-backend/     NestJS API + signaling (src/, prisma/, .env.example)
 ├── bee-collab-frontend/    Next.js app (src/app: home, login, meeting/[id], WakeServer)
-├── test/                   QA workspace: docs 01–09, tools/, e2e/
+├── test/                   QA workspace (local only, git-ignored): docs 01–09, tools/, e2e/
 ├── docker-compose.yml      local Postgres
 ├── run.bat                 Windows launcher
 ├── CLAUDE.md               context for AI assistants working in the repo

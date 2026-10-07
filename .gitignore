@@ -1,11 +1,5 @@
-# test workspace
-test/node_modules/
-test/test-results/
-test/playwright-report/
-test/.auth/
-# throw-away probe scripts (never committed)
-test/tools/_*.mjs
-test/e2e/_*.spec.ts
+# QA workspace: kept locally for the QA agent, never committed or pushed
+test/
 
 # misc
 .dist/
