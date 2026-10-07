@@ -55,6 +55,12 @@ async function fetchIceServers(token: string): Promise<RTCIceServer[]> {
 const fmtRate = (kbps: number) =>
   kbps >= 1000 ? `${(kbps / 1000).toFixed(1)} Mbps` : `${Math.round(kbps)} kbps`;
 
+// Chat time comes from the server's createdAt (UTC ISO), shown in the viewer's locale/timezone
+const formatChatTime = (createdAt?: string) => {
+  const d = createdAt ? new Date(createdAt) : null;
+  return d && !Number.isNaN(d.getTime()) ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+};
+
 type ConnStats = { rttMs: number | null; downKbps: number; upKbps: number; bars: number };
 
 // 4-bar signal-strength indicator coloured by connection quality
@@ -2429,13 +2435,13 @@ export default function Meeting() {
                           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.25rem' }}>
                             {isMe ? (
                               <>
-                                <span style={{ fontSize: '0.75rem', color: '#8f95a3' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span data-testid="chat-message-time" style={{ fontSize: '0.75rem', color: '#8f95a3' }}>{formatChatTime(m.createdAt)}</span>
                                 <strong style={{ fontSize: '0.875rem', color: '#4a4d55' }}>{t('you')}</strong>
                               </>
                             ) : (
                               <>
                                 <strong style={{ fontSize: '0.875rem', color: '#4a4d55' }}>{m.sender?.name || t('userN', { id: m.senderId?.substring(0, 5) ?? '' })}</strong>
-                                <span style={{ fontSize: '0.75rem', color: '#8f95a3' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span data-testid="chat-message-time" style={{ fontSize: '0.75rem', color: '#8f95a3' }}>{formatChatTime(m.createdAt)}</span>
                               </>
                             )}
                           </div>
