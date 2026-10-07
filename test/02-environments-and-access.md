@@ -6,7 +6,7 @@
 | Frontend | https://beecollab.vercel.app |
 | Backend API | https://beecollab-rwbj.onrender.com |
 | Swagger UI | https://beecollab-rwbj.onrender.com/api/docs (JSON: `/api/docs-json`) |
-| Health + build id | https://beecollab-rwbj.onrender.com/health → `{ status, db, commit, uptimeSeconds }` |
+| Health + build id | https://beecollab-rwbj.onrender.com/health → `{ status, db, commit, uptimeSeconds, testSupport }` |
 
 * `commit` is the deployed git SHA (first 7 chars; `dev` when running locally). Use it to confirm the build you are testing: `npm run wait -- --commit <sha>`.
 * `uptimeSeconds` small ⇒ the server just (re)started — useful to detect a cold start or a redeploy that killed your sockets.
@@ -63,7 +63,8 @@ Tests leave users and meetings behind (meetings vanish by themselves when empty;
 1. **Local:** reset the docker volume (above).
 2. **Any environment, if the backend owner enabled it:** the guarded endpoints
    * `GET  /test-support/status` and `POST /test-support/cleanup`, header `x-test-token: <TEST_ADMIN_TOKEN>`
-   * They return **404** unless `TEST_SUPPORT_ENABLED=true` **and** `TEST_ADMIN_TOKEN` (≥ 16 chars) are set on the backend, and **401** for a wrong token.
+   * They return **404** unless `TEST_SUPPORT_ENABLED=true` **and** `TEST_ADMIN_TOKEN` (≥ 16 chars) are set on the backend, and **401** for a missing/wrong token. Surrounding whitespace, quotes and upper case (`TRUE`) in the env values are tolerated.
+   * To tell "disabled" from "wrong token" **without** the token: `GET /health` → `testSupport: "enabled" | "disabled"`; without a token an *enabled* instance answers **401**, a disabled one **404**. The reason for "disabled" is logged once at startup (`QA endpoints disabled: …`, never containing the token).
    * Cleanup deletes only data belonging to users whose email ends with `@qa.beecollab.test` (their meetings, participations, chat messages, poll votes, and the users) in foreign-key order inside one transaction. Everything else is untouched.
    * Run it while no test is executing (a row inserted mid-way can make the user delete fail).
    * CLI: `TEST_ADMIN_TOKEN=… API_URL=… npm run cleanup` (exit codes: 0 ok · 1 failed · 2 no token · 3 disabled (404) · 4 wrong token (401)).

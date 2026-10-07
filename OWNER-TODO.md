@@ -16,14 +16,14 @@ Tes otomatis membuat akun `@qa.beecollab.test` di database Neon-mu. Satu kali ru
    | Key | Value |
    |---|---|
    | `TEST_SUPPORT_ENABLED` | `true` |
-   | `TEST_ADMIN_TOKEN` | token dari langkah 1 (minimal 16 karakter) |
+   | `TEST_ADMIN_TOKEN` | *(tempel hasil langkah 1 saja, minimal 16 karakter)* |
 
-   Simpan; Render akan deploy ulang (koneksi WebSocket yang sedang berjalan terputus, jadi lakukan saat tidak ada yang call).
-3. Cek:
+   Kolom Value hanya berisi nilainya: `true` untuk yang pertama (tanpa tanda kutip atau kata tambahan) dan token itu sendiri untuk yang kedua. Simpan; Render akan deploy ulang (koneksi WebSocket yang sedang berjalan terputus, jadi lakukan saat tidak ada yang call).
+3. **Cek dulu status fitur lewat `/health`** (tanpa token, aman dibuka di browser): `https://beecollab-rwbj.onrender.com/health` harus memuat `"testSupport":"enabled"`. Kalau `"disabled"`, buka Render → **Logs** dan cari baris `QA endpoints disabled:`; alasannya tertulis di sana, misalnya `TEST_SUPPORT_ENABLED must be exactly "true" (got "…")` atau `TEST_ADMIN_TOKEN must be at least 16 characters (got N)`. Kalau `/health` tidak punya field `testSupport` sama sekali, Render belum menjalankan versi terbaru (lihat `commit`). Lalu cek endpoint-nya:
    ```powershell
    curl.exe -H "x-test-token: TOKEN_KAMU" https://beecollab-rwbj.onrender.com/test-support/status
    ```
-   Harus muncul `"enabled":true` dan jumlah akun uji. Tanpa/dengan token salah → `401`. Kalau tetap `404`, variabelnya belum terbaca (cek ejaan, panjang token, dan bahwa deploy sudah selesai: `/health` → `uptimeSeconds` kecil).
+   Harus muncul `"enabled":true` dan jumlah akun uji. Tanpa token atau dengan token salah → `401`. Kalau `404`: fitur belum aktif (lihat `/health` dan log di atas). Kode memang sengaja membalas 404 yang identik dengan route yang tidak ada saat fitur mati, jadi pembeda satu-satunya adalah `/health` dan log startup. Spasi, huruf besar-kecil (`TRUE`) dan tanda kutip yang ikut tersalin sudah ditoleransi; kalimat penjelasan yang ikut tersalin tidak.
 4. Pakai: `cd test` lalu `TEST_ADMIN_TOKEN=... API_URL=https://beecollab-rwbj.onrender.com npm run cleanup`, atau otomatis setelah E2E: `QA_CLEANUP=1 TEST_ADMIN_TOKEN=... npm run e2e`.
 
 **Keamanan:** endpoint ini hanya menghapus data milik akun berakhiran `@qa.beecollab.test` (data nyata tidak tersentuh; terbukti lewat tes integrasi), butuh token, dan token dibandingkan dengan cara aman terhadap timing attack. Kalau selesai testing, hapus kedua variabel di Render dan endpoint kembali 404.

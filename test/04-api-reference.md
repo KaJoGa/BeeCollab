@@ -14,7 +14,7 @@ Auth: `Authorization: Bearer <JWT>` where noted. **Every status code below was o
 | Method & path | Auth | Result |
 |---|---|---|
 | `GET /` | no | 200, `data: "Hello World!"` |
-| `GET /health` | no | 200 always (once up): `{ status:"ok", db:"up"\|"down", commit, uptimeSeconds }`. Waits ≤ 8 s for `SELECT 1`; `db:"down"` + log line `DB check failed: …` when the query fails. |
+| `GET /health` | no | 200 always (once up): `{ status:"ok", db:"up"\|"down", commit, uptimeSeconds, testSupport:"enabled"\|"disabled" }` (`testSupport` = whether the hidden QA endpoints are on). Waits ≤ 8 s for `SELECT 1`; `db:"down"` + log line `DB check failed: …` when the query fails. |
 | `GET /api/docs`, `/api/docs-json` | no | Swagger UI / OpenAPI JSON (not wrapped in the envelope) |
 
 ## Auth

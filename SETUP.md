@@ -137,8 +137,10 @@ Variabel **opsional** (jangan diisi kecuali sedang menjalankan QA; lihat [OWNER-
 
 | Key | Value |
 |---|---|
-| `TEST_SUPPORT_ENABLED` | `true` (menyalakan endpoint pembersih data QA; default mati) |
+| `TEST_SUPPORT_ENABLED` | `true` |
 | `TEST_ADMIN_TOKEN` | token acak ≥ 16 karakter |
+
+Isi kolom Value **hanya** nilainya: `true` (empat huruf, tanpa kata lain), dan token saja. Jangan menyalin kalimat penjelasan. Fungsi variabel ini: menyalakan endpoint pembersih data QA (default mati).
 
 **Jangan** isi `PORT`: Render menyediakannya sendiri (default 10000) dan backend kita sudah membaca `PORT` dan mendengarkan di `0.0.0.0`, yang disyaratkan Render.
 
