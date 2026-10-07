@@ -50,6 +50,7 @@ Daftar kelemahan sudah ada di `test/07-observed-behaviors-and-risks.md` (ID `R-x
 ## 5. Perawatan ringan
 * **Kuota gratis:** cek dashboard Render (jam instance, 750/bulan) dan Neon (CU-hours, 100/bulan, 1 GB) sesekali. Satu run penuh E2E di produksi membuat Neon aktif ± 5 menit.
 * **Setiap push ke `main` men-deploy ulang** Render dan Vercel dan memutus call yang sedang berjalan. `GET /health` menampilkan `commit` yang sedang live.
+* **Kerentanan dependency (`npm audit`):** sudah dibereskan di dependency produksi, kecuali 6 temuan di rantai CLI Prisma (hanya dipakai saat build, bukan di server). Itu **sengaja dibiarkan**: "perbaikan" yang disarankan npm adalah downgrade ke Prisma 6. Jangan jalankan `npm audit fix --force`. Cek lagi sesekali dengan `npm audit --omit=dev` di folder backend dan frontend.
 * **Jangan buat service Render lain:** semua service free berbagi jatah 750 jam.
 * Kalau kamu pernah membuat file `bee-collab-backend/.env.production.local` (berisi string koneksi Neon), hapus setelah tidak dipakai. File itu di-ignore git, tapi berisi rahasia.
 * `package-lock.json` backend dan frontend punya perubahan kecil dari `npm install` yang sengaja **tidak** di-commit (hanya noise).

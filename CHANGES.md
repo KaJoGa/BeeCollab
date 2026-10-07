@@ -32,6 +32,13 @@ Everything the project gained since the original VPS deployment was lost. Groupe
 | `3399eef` | `test/` workspace: `tools/` (wait-for-deploy, seed-accounts, cleanup, smoke-api 45 checks, smoke-ws 41 checks) and `e2e/` (64 Playwright tests, fake camera/mic, real WebRTC) |
 | (this batch) | Playwright `global-teardown` (opt-in cleanup), `timedFetch`, exit-code hardening of the tools, `test/CLAUDE.md`, `.gitignore` for probe scripts, `test/tools/cleanup.sql` (**untested**) |
 
+### Dependency security update (2026-10-07, after the first deployment)
+`npm audit` reported 30 vulnerabilities in the backend (1 critical) and 18 in the frontend (1 critical). Applied the non-breaking fixes only (**never `--force`**):
+* Backend: `npm audit fix` (lockfile only, 72 packages moved: `ws`, `socket.io` stack, `multer`, `qs`, `body-parser`, `proxy-addr`, …) and `npm update @prisma/client @prisma/adapter-pg prisma` so CLI, client and adapter are **all 7.10.0** (the audit fix alone had moved only the CLI — a version mismatch caught before anything was pushed).
+* Frontend: `next` and `eslint-config-next` pinned to **16.4.0** (an exact pin cannot be moved by `audit fix`).
+* Result (production dependencies): backend 20 → 6, frontend 9 → 0. The 6 left are the Prisma CLI chain (build-time only; its "fix" would downgrade Prisma) — accepted, see `test/07` R-42.
+* Verified locally after the update: `tsc` + `next build`, backend build + Jest (24 pass, same 6 legacy suites fail), `smoke-api` 45/45, `smoke-ws` 41/41, Playwright 64/64 (exit code 0).
+
 ## 5. Verification matrix (end of run)
 | Check | Local | Live (Vercel + Render + Neon + Cloudflare TURN) |
 |---|---|---|
