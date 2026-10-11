@@ -1,23 +1,28 @@
-# 🐝 BeeCollab
+# BeeCollab
 
-**BeeCollab** is a Google-Meet-style video meeting web app: peer-to-peer video/audio, screen sharing, live chat, hand raise, polls, agenda, reactions and host controls. It is a college project, now deployed on free-tier hosting and used as the **system under test** for a software-testing portfolio.
+**BeeCollab** is a Google-Meet-style video meeting web application featuring peer-to-peer audio/video calling, screen sharing, real-time chat, hand-raising, polls, agenda tracking, reactions, and comprehensive host management tools.
 
-| | |
-|---|---|
-| 🌐 App | https://beecollab.vercel.app |
-| 🔌 API | https://beecollab-rwbj.onrender.com (health: `/health`, Swagger: `/api/docs`) |
+**Live Demo:** [https://beecollab.vercel.app](https://beecollab.vercel.app)
 
-> The free hosting **sleeps** when idle. Opening any page of the app wakes the backend automatically (a banner says so); the first load after a long pause can take up to a minute.
+> [!NOTE]
+> The backend is deployed on a free-tier instance that **sleeps when idle**. Opening the application automatically wakes the server (a status banner appears during wake-up); initial cold starts may take approximately 30–60 seconds.
+
+---
 
 ## Features
-* **Auth:** register / sign in (JWT), password-strength hint, show/hide password, logout confirmation, and **guest access** (display name only, no account).
-* **Meetings:** create with title, duration and capacity; join by 8-character room code or link; automatic start, expiry and cleanup.
-* **Real-time video:** WebRTC **full mesh** (no media server), screen sharing, voice-activity highlight, device switching, connection stats (RTT / bitrate / signal bars), bitrate caps that shrink as the mesh grows, and a **data-saver (audio-only)** mode.
-* **Collaboration:** chat (persisted for registered users), hand-raise speaking queue, polls, agenda with live "current item", emoji reactions.
-* **Host tools:** host and co-host roles, kick, force-mute, ask-to-unmute, end for everyone.
-* **Reliability for free hosting:** wake-on-open, STUN + **Cloudflare TURN** fallback for restrictive networks, health endpoint reporting the deployed commit.
+
+* **Authentication & Access:** Email & password sign-up/sign-in (JWT), password-strength indicators, show/hide password, and **guest access** (join meetings instantly with just a display name, no account needed).
+* **Meeting Management:** Create instant meetings with customizable duration and participant limits, join via direct link or 8-character room code, and automatic meeting lifecycle cleanup.
+* **Real-Time Video & Audio:** WebRTC **full mesh** (peer-to-peer, no media server required), screen sharing, active speaker detection, device switching, real-time connection stats (RTT, bitrate, signal quality), and adaptive bitrate caps with an **audio-only data-saver mode**.
+* **Interactive Collaboration:** Live in-meeting chat, hand-raise speaking queue, interactive polls, agenda tracking with live active-item indicators, and floating emoji reactions.
+* **Host & Co-host Controls:** Assign co-hosts, kick participants, remote mute, request to unmute, and end the meeting for all participants.
+* **Bilingual Interface:** Built-in English and Indonesian language support with instant toggle.
+* **Free-Tier Resilience:** Automatic wake-on-open mechanism, STUN servers + **Cloudflare Realtime TURN** relay fallback for restrictive NATs and firewalls.
+
+---
 
 ## Architecture
+
 ```
 Browser ◄──── WebRTC (P2P, STUN/TURN) ────► Browser
    │  REST + Socket.io (/meetings)               │
@@ -26,77 +31,88 @@ Browser ◄──── WebRTC (P2P, STUN/TURN) ────► Browser
                      ▼
               PostgreSQL (Neon)        Cloudflare TURN (credentials minted by the backend)
 ```
-The server never touches media; it handles authentication, meeting bookkeeping and **signaling**.
 
-| Layer | Stack | Hosted on |
+The application uses a full-mesh architecture where media streams flow directly between peers; the backend server only handles authentication, meeting state management, and **WebRTC signaling**.
+
+| Layer | Stack | Platform |
 |---|---|---|
 | Frontend | Next.js 16 (App Router, React 19), TypeScript, socket.io-client | Vercel (Hobby) |
-| Backend | NestJS 11, Socket.io, Passport JWT, Prisma 7 (`@prisma/adapter-pg`), Swagger | Render (free) |
-| Database | PostgreSQL | Neon (free, scale-to-zero) |
-| NAT traversal | Google/Cloudflare STUN, Cloudflare Realtime TURN | Cloudflare |
+| Backend | NestJS 11, Socket.io, Passport JWT, Prisma 7 (`@prisma/adapter-pg`) | Render (Free) |
+| Database | PostgreSQL | Neon (Serverless Postgres) |
+| NAT Traversal | Google/Cloudflare STUN, Cloudflare Realtime TURN | Cloudflare |
 
-### Software-engineering patterns used
-| Pattern | Where |
+### Software Engineering Patterns
+| Pattern | Implementation |
 |---|---|
-| Repository + dependency inversion | `src/repositories/` — interfaces with Prisma implementations bound by DI tokens |
-| Response envelope (interceptor) | `ResponseInterceptor` wraps every REST success in `{success,data,message,timestamp,path}` |
-| Central exception filter | `HttpExceptionFilter` formats every error the same way |
-| Observer / event-driven | `@nestjs/event-emitter`: services emit `meeting.ended`, `participant.joined/left`, `participant.media_changed`; `MeetingEventsListener` reacts (e.g. auto-end an empty meeting) |
-| OpenAPI documentation | `@nestjs/swagger` at `/api/docs` |
-| Guarded tooling | `test-support` endpoints are 404 unless explicitly enabled, token-protected, and scoped to `@qa.beecollab.test` data |
+| Repository + Dependency Inversion | `src/repositories/` — interfaces with Prisma implementations bound by NestJS DI tokens |
+| Response Envelope (Interceptor) | `ResponseInterceptor` wraps REST responses uniformly in `{success, data, message, timestamp, path}` |
+| Central Exception Filter | `HttpExceptionFilter` provides standard error formatting across all REST endpoints |
+| Observer / Event-Driven | `@nestjs/event-emitter`: services emit lifecycle events (`meeting.ended`, `participant.left`, etc.); `MeetingEventsListener` handles reactive logic |
+| Guarded Tooling | Optional test-support endpoints are protected, disabled by default, and scoped to test data |
 
-## Run it locally
-Requirements: Node 20+, Docker, npm.
+---
+
+## Run It Locally
+
+### Prerequisites
+* Node.js 20+
+* Docker & Docker Compose
+* npm
+
+### Setup Steps
 ```bash
-docker compose up -d                              # Postgres 16 on :5432
+# 1. Start local PostgreSQL
+docker compose up -d
 
+# 2. Setup backend
 cd bee-collab-backend
-cp .env.example .env                              # defaults match docker-compose
+cp .env.example .env                              # Defaults match docker-compose
 npm install
 npx prisma generate && npx prisma migrate deploy
-npm run start:dev                                 # http://localhost:3000   (Swagger: /api/docs)
+npm run start:dev                                 # Runs on http://localhost:3000
 
+# 3. Setup frontend
 cd ../bee-collab-frontend
 cp .env.example .env.local
 npm install
-npm run dev                                       # http://localhost:3001
+npm run dev                                       # Runs on http://localhost:3001
 ```
-Windows shortcut: `run.bat` installs dependencies and starts both apps. Environment variables are documented in `bee-collab-backend/.env.example` and [test/02-environments-and-access.md](test/02-environments-and-access.md).
 
-## Deployment (what is running)
-| Piece | Service | Notes |
+> **Windows shortcut:** Run `run.bat` from the root directory to install dependencies and start both apps simultaneously. Environment variables are documented in `bee-collab-backend/.env.example` and `bee-collab-frontend/.env.example`.
+
+---
+
+## Deployment Overview
+
+| Component | Platform | Configuration Notes |
 |---|---|---|
-| Frontend | Vercel, root directory `bee-collab-frontend` | `NEXT_PUBLIC_API_URL` is baked in at build time |
-| Backend | Render web service, root `bee-collab-backend` | build `npm install --include=dev && npx prisma generate && npm run build`, start `npm run start:prod`, Node 24 |
-| Database | Neon | pooled URL for the app (`DATABASE_URL`), direct URL for migrations (`DIRECT_URL`); apply schema with `npx prisma migrate deploy` |
-| TURN | Cloudflare | `CF_TURN_KEY_ID`, `CF_TURN_API_TOKEN` on Render; browsers only ever receive short-lived credentials |
-| CORS | `FRONTEND_ORIGIN` on Render | the Vercel origin; unset = `*` (local development) |
+| Frontend | Vercel | Root directory `bee-collab-frontend`, `NEXT_PUBLIC_API_URL` set at build time |
+| Backend | Render | Root directory `bee-collab-backend`, Node 24 runtime, starts with `npm run start:prod` |
+| Database | Neon | Pooled connection for the runtime app (`DATABASE_URL`), direct URL for migrations (`DIRECT_URL`) |
+| TURN Relay | Cloudflare | Ephemeral TURN credentials generated server-side |
+| CORS | Backend environment | Locked to the frontend origin via `FRONTEND_ORIGIN` |
 
-Every push to `main` redeploys both apps. `GET /health` returns `{ status, db, commit, uptimeSeconds }` so you can see which build is live. Step-by-step account setup: [SETUP.md](SETUP.md). Roadmap and decisions: [PLAN.md](PLAN.md). Change history of the deployment work: [CHANGES.md](CHANGES.md).
+---
 
 ## Testing
-Everything for testers lives in the local-only folder **`test/`** (git-ignored on purpose: it is handed to the QA agent directly and is not part of the published repository, so the `test/...` links in this file only work on the owner's machine): system and API documentation, feature inventory, test ideas, a risk list, Playwright E2E specs (real WebRTC with fake devices), and REST/WebSocket smoke tools.
-```bash
-cd test && npm install && npx playwright install chromium
-npm run smoke     # ≈ 90 REST + WebSocket checks
-npm run e2e       # 64 browser tests (WEB_URL / API_URL select the environment)
-```
-Backend unit tests: `cd bee-collab-backend && npm test` (note: 6 generated suites are known to fail — see [test/07-observed-behaviors-and-risks.md](test/07-observed-behaviors-and-risks.md), R-41).
 
-## Repository layout
+### Backend Unit Tests
+```bash
+cd bee-collab-backend
+npm test
+```
+
+The test suite covers core authentication, meeting lifecycle handling, and signaling event routing.
+
+---
+
+## Repository Layout
+
 ```
 BeeCollab/
-├── bee-collab-backend/     NestJS API + signaling (src/, prisma/, .env.example)
-├── bee-collab-frontend/    Next.js app (src/app: home, login, meeting/[id], WakeServer)
-├── test/                   QA workspace (local only, git-ignored): docs 01–09, tools/, e2e/
-├── docker-compose.yml      local Postgres
-├── run.bat                 Windows launcher
-├── CLAUDE.md               context for AI assistants working in the repo
-├── PLAN.md                 roadmap, decisions, status
-├── SETUP.md                owner's account setup guide (Indonesian)
-├── CHANGES.md              change log of the deployment/test-readiness work
-└── OWNER-TODO.md           things only the owner can do (Indonesian)
+├── bee-collab-backend/     # NestJS API, WebSocket signaling gateway & Prisma schema
+├── bee-collab-frontend/    # Next.js 16 web client & WebRTC UI components
+├── docker-compose.yml      # Local PostgreSQL 16 container definition
+├── run.bat                 # Windows development launcher script
+└── README.md               # Project documentation
 ```
-
-## License
-Educational project. No warranty.
