@@ -5,6 +5,9 @@ test/
 BEECOLLAB_TESTING_SURFACE.md
 CLAUDE_QA_PROMPT.md
 
+# Local documentation folder
+read/
+
 # misc
 .dist/
 *.log
