@@ -2,10 +2,13 @@
 
 **BeeCollab** is a Google-Meet-style video meeting web application featuring peer-to-peer audio/video calling, screen sharing, real-time chat, hand-raising, polls, agenda tracking, reactions, and comprehensive host management tools.
 
-**Live Demo:** [https://beecollab.vercel.app](https://beecollab.vercel.app)
+| | Deployment Link |
+|---|---|
+| **Live App** | [https://beecollab.vercel.app](https://beecollab.vercel.app) |
+| **API Docs** | [Swagger UI](https://beecollab-rwbj.onrender.com/api/docs) |
 
 > [!NOTE]
-> The backend is deployed on a free-tier instance that **sleeps when idle**. Opening the application automatically wakes the server (a status banner appears during wake-up); initial cold starts may take approximately 30–60 seconds.
+> The backend is deployed on a free-tier instance that **sleeps when idle**. Accessing the app or Swagger documentation for the first time will automatically wake the server; initial cold starts may take approximately 30–60 seconds.
 
 ---
 
